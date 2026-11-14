@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cotizador de transporte marítimo CINTAC.">
+    <title>Cotizador | CINTAC</title>
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}">
+</head>
+<body class="quote-page">
+    <header class="quote-header">
+        <div class="container nav-wrap">
+            <a class="brand" href="/" aria-label="CINTAC inicio">
+                <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
+            </a>
+            <div class="quote-actions">
+                <a class="dark-button quote-history" href="{% url 'historial' %}">
+                    Historial
+                </a>
+                <a class="dark-button quote-logout" href="{% url 'login' %}">
+                    Cerrar sesión <span>↗</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="quote-main container">
+        <section class="quote-intro">
+            <p class="eyebrow orange">COTIZADOR CINTAC</p>
+            <h1>Calcula tu transporte</h1>
+            <p>Ingresa los datos de la carga para estimar la cantidad de contenedores y el costo de envío.</p>
+        </section>
+
+        <div class="quote-layout">
+            <section class="quote-card" aria-labelledby="quote-form-title">
+                <h2 id="quote-form-title">Datos de la carga</h2>
+                {% if error %}
+                    <p class="quote-alert" role="alert">{{ error }}</p>
+                {% endif %}
+                <form class="quote-form" method="post">
+                    {% csrf_token %}
+                    <div class="quote-fields">
+                        <div class="quote-field">
+                            <label for="nombre_cliente">Nombre del cliente</label>
+                            <input id="nombre_cliente" name="nombre_cliente" type="text" maxlength="100" value="{{ form_data.nombre_cliente|default:'' }}" required>
+                        </div>
+                        <div class="quote-field">
+                            <label for="empresa">Empresa</label>
+                            <input id="empresa" name="empresa" type="text" maxlength="100" value="{{ form_data.empresa|default:'' }}" required>
+                        </div>
+                        <div class="quote-field">
+                            <label for="correo_cliente">Correo del cliente</label>
+                            <input id="correo_cliente" name="correo_cliente" type="email" maxlength="100" value="{{ form_data.correo_cliente|default:'' }}" required>
+                        </div>
+                        <div class="quote-field">
+                            <label for="puerto_origen">Puerto de origen</label>
+                            <select id="puerto_origen" name="puerto_origen" required>
+                                <option value="">Selecciona un puerto</option>
+                                {% for puerto in puertos_origen %}
+                                    <option value="{{ puerto }}" {% if form_data.puerto_origen == puerto %}selected{% endif %}>
+                                        {{ puerto }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="quote-field">
+                            <label for="puerto_destino">Puerto de destino</label>
+                            <select id="puerto_destino" name="puerto_destino" required>
+                                <option value="">Selecciona un puerto</option>
+                                {% for puerto in puertos_destino %}
+                                    <option value="{{ puerto }}" {% if form_data.puerto_destino == puerto %}selected{% endif %}>
+                                        {{ puerto }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="quote-field">
+                            <label for="peso_carga">Peso de la carga (kg)</label>
+                            <input id="peso_carga" name="peso_carga" type="number" min="1" step="1" value="{{ form_data.peso_carga|default:'' }}" required>
+                        </div>
+                    </div>
+                    <div class="quote-field">
+                        <label for="descripcion_carga">Descripción de la carga</label>
+                        <textarea id="descripcion_carga" name="descripcion_carga" rows="4" placeholder="Describe brevemente la carga" required>{{ form_data.descripcion_carga|default:'' }}</textarea>
+                    </div>
+                    <button class="dark-button quote-submit" type="submit">Calcular cotización <span>↗</span></button>
+                </form>
+            </section>
+
+            {% if resultados %}
+                <div id="quote-results" class="quote-results" tabindex="-1">
+                    {% for resultado in resultados %}
+                        <section class="quote-result" aria-labelledby="quote-result-title-{{ resultado.tipo_contenedor|slugify }}">
+                            <p class="eyebrow orange">RESULTADO ESTIMADO</p>
+                            <h2 id="quote-result-title-{{ resultado.tipo_contenedor|slugify }}">{{ resultado.tipo_contenedor }}</h2>
+                            <p class="quote-route">{{ resultado.ruta.puerto_origen }} → {{ resultado.ruta.puerto_destino }}</p>
+                            <dl class="quote-summary">
+                                <div><dt>Cliente</dt><dd>{{ resultado.nombre_cliente }}</dd></div>
+                                <div><dt>Empresa</dt><dd>{{ resultado.empresa }}</dd></div>
+                                <div><dt>Correo</dt><dd>{{ resultado.correo_cliente }}</dd></div>
+                                <div><dt>Carga</dt><dd>{{ resultado.descripcion_carga|default:"Sin descripción" }}</dd></div>
+                                <div><dt>Peso ingresado</dt><dd>{{ resultado.peso_carga }} kg</dd></div>
+                                <div><dt>Contenedores necesarios</dt><dd class="quote-highlight">{{ resultado.cantidad_contenedores }}</dd></div>
+                                <div><dt>Costo fijo</dt><dd>{{ resultado.moneda }} {{ resultado.costo_fijo|floatformat:2 }}</dd></div>
+                                <div><dt>IVA (19%)</dt><dd>{{ resultado.moneda }} {{ resultado.monto_iva|floatformat:2 }}</dd></div>
+                            </dl>
+                            <div class="quote-total">
+                                <span>Costo total estimado</span>
+                                <strong>{{ resultado.moneda }} {{ resultado.monto_total|floatformat:2 }}</strong>
+                            </div>
+                            <button class="dark-button quote-submit quote-report-button" type="button" data-container-type="{{ resultado.tipo_contenedor }}">Generar informe <span>↗</span></button>
+                            <p class="quote-note">El valor final puede variar según las condiciones comerciales, climaticas y de transporte.</p>
+                        </section>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h2></h2>
+            {% endif %}
+        </div>
+    </main>
+    {% if resultados %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('quote-results').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                document.querySelectorAll('.quote-report-button').forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        button.disabled = true;
+                        var body = new URLSearchParams({
+                            tipo_contenedor: button.dataset.containerType,
+                            csrfmiddlewaretoken: document.querySelector(
+                                'input[name="csrfmiddlewaretoken"]'
+                            ).value
+                        });
+                        fetch("{% url 'informe' %}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': body.get('csrfmiddlewaretoken')
+                            },
+                            body: body
+                        }).then(function (response) {
+                            if (!response.ok) {
+                                throw new Error('No fue posible generar el informe.');
+                            }
+                            return Promise.all([
+                                response.blob(),
+                                response.headers.get('Content-Disposition')
+                            ]);
+                        }).then(function (result) {
+                            var blob = result[0];
+                            var disposition = result[1] || '';
+                            var filenameMatch = disposition.match(/filename="([^"]+)"/);
+                            var url = URL.createObjectURL(blob);
+                            var link = document.createElement('a');
+                            link.href = url;
+                            link.download = filenameMatch
+                                ? filenameMatch[1]
+                                : 'Cotizacion.pdf';
+                            link.click();
+                            URL.revokeObjectURL(url);
+                            window.location.href = "{% url 'cotizador' %}";
+                        }).catch(function (error) {
+                            button.disabled = false;
+                            window.alert(error.message);
+                        });
+                    });
+                });
+            });
+        </script>
+    {% endif %}
+</body>
+</html>
