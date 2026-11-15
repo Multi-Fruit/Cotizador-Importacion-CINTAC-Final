@@ -1,9 +1,10 @@
 from django.urls import path
-from Cotizador.views import Cotizador, historial, login, logout
+from Cotizador.views import Cotizador, historial, login, logout, informe
 
 urlpatterns = [
     path('login/', login, name='login'),
     path('logout/', logout, name='logout'),
     path('cotizador/', Cotizador, name='cotizador'),
     path('historial/', historial, name='historial'),
+    path('informe/', informe, name='informe')
 ]
