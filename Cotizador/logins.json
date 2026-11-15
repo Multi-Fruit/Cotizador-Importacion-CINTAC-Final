@@ -1,0 +1,32 @@
+[
+  {
+    "model": "Cotizador.login",
+    "pk": 2,
+    "fields": {
+      "username": "__verification_login__",
+      "password": "__verification_password__",
+      "email": "verification@example.com",
+      "rol": "Administrador CINTAC"
+    }
+  },
+  {
+    "model": "Cotizador.login",
+    "pk": 3,
+    "fields": {
+      "username": "Christopher",
+      "password": "Solopalabras1",
+      "email": "asd@gmail.com",
+      "rol": "Administrador CINTAC"
+    }
+  },
+  {
+    "model": "Cotizador.login",
+    "pk": 7,
+    "fields": {
+      "username": "Gabriel",
+      "password": "Solopalabras1",
+      "email": "gabriel@gmail.com",
+      "rol": "Administrador CINTAC"
+    }
+  }
+]

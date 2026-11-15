@@ -1,0 +1,325 @@
+[
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 1,
+    "fields": {
+      "id_ruta": 9,
+      "id_usuario": 3,
+      "fecha": "2026-10-06T06:13:55.658Z",
+      "nombre_cliente": "Norman",
+      "empresa": "OsCorp",
+      "correo_cliente": "norman@gmail.com",
+      "descripcion_carga": "asdasdas",
+      "peso_ingresado_kg": 8900,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 1,
+      "monto_IVA": 1045,
+      "monto_total": 6545
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 2,
+    "fields": {
+      "id_ruta": 19,
+      "id_usuario": 3,
+      "fecha": "2026-10-06T06:27:04.035Z",
+      "nombre_cliente": "Christopher",
+      "empresa": "Completos",
+      "correo_cliente": "completoschris@gmail.com",
+      "descripcion_carga": "asdasd",
+      "peso_ingresado_kg": 5000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 1,
+      "monto_IVA": 1083,
+      "monto_total": 6783
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 3,
+    "fields": {
+      "id_ruta": 1,
+      "id_usuario": 3,
+      "fecha": "2026-10-06T12:43:11.489Z",
+      "nombre_cliente": "Gabriel",
+      "empresa": "GabrielitoCompu",
+      "correo_cliente": "gabriel@gmail.com",
+      "descripcion_carga": "Hola soy gabrielito",
+      "peso_ingresado_kg": 25000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 1634,
+      "monto_total": 10234
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 4,
+    "fields": {
+      "id_ruta": 14,
+      "id_usuario": 7,
+      "fecha": "2026-10-16T22:04:53.853Z",
+      "nombre_cliente": "Maestro Polar",
+      "empresa": "polarizados",
+      "correo_cliente": "master@masterpeace.com",
+      "descripcion_carga": "asdasdasd",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 456,
+      "monto_total": 2856
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 5,
+    "fields": {
+      "id_ruta": 17,
+      "id_usuario": 3,
+      "fecha": "2026-10-16T23:01:27.391Z",
+      "nombre_cliente": "asdasd",
+      "empresa": "asdasd",
+      "correo_cliente": "asdasd@gmail.com",
+      "descripcion_carga": "asdasdasd",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 2166,
+      "monto_total": 13566
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 6,
+    "fields": {
+      "id_ruta": 5,
+      "id_usuario": 3,
+      "fecha": "2026-10-16T23:03:55.992Z",
+      "nombre_cliente": "Orochimaru",
+      "empresa": "Aldea del sonido",
+      "correo_cliente": "orochi@gmail.com",
+      "descripcion_carga": "8645312",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 2451,
+      "monto_total": 15351
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 7,
+    "fields": {
+      "id_ruta": 3,
+      "id_usuario": 3,
+      "fecha": "2026-10-16T23:07:37.722Z",
+      "nombre_cliente": "Asgardo",
+      "empresa": "yggdrasil",
+      "correo_cliente": "asg@gmail.com",
+      "descripcion_carga": "asdasdasd",
+      "peso_ingresado_kg": 49996,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 2451,
+      "monto_total": 15351
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 8,
+    "fields": {
+      "id_ruta": 18,
+      "id_usuario": 3,
+      "fecha": "2026-10-16T23:12:32.758Z",
+      "nombre_cliente": "Matias",
+      "empresa": "mayea",
+      "correo_cliente": "mati@gmail.com",
+      "descripcion_carga": "asd654",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 2166,
+      "monto_total": 13566
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 9,
+    "fields": {
+      "id_ruta": 13,
+      "id_usuario": 3,
+      "fecha": "2026-10-17T00:01:06.994Z",
+      "nombre_cliente": "Jeannette",
+      "empresa": "asdasd",
+      "correo_cliente": "jeannette@gmail.com",
+      "descripcion_carga": "caca",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 1710,
+      "monto_total": 10710
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 10,
+    "fields": {
+      "id_ruta": 12,
+      "id_usuario": 3,
+      "fecha": "2026-10-17T00:40:08.444Z",
+      "nombre_cliente": "Claudio Urrutia",
+      "empresa": "Alborada",
+      "correo_cliente": "claudio@gmail.com",
+      "descripcion_carga": "Son materiales necesarios para la construccion",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 1824,
+      "monto_total": 11424
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 11,
+    "fields": {
+      "id_ruta": 11,
+      "id_usuario": 3,
+      "fecha": "2026-11-04T01:29:45.289Z",
+      "nombre_cliente": "Francisca Pena",
+      "empresa": "Kawaii SA",
+      "correo_cliente": "fran@gmail.com",
+      "descripcion_carga": "Importación de mangas.",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 2546,
+      "monto_total": 15946
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 12,
+    "fields": {
+      "id_ruta": 8,
+      "id_usuario": 3,
+      "fecha": "2026-11-05T01:17:20.398Z",
+      "nombre_cliente": "Pepe Mujica",
+      "empresa": "Uruguay SA",
+      "correo_cliente": "pepe@gmail.com",
+      "descripcion_carga": "Provisiones para contruir casas",
+      "peso_ingresado_kg": 50000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 2,
+      "monto_IVA": 2546,
+      "monto_total": 15946
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 13,
+    "fields": {
+      "id_ruta": 13,
+      "id_usuario": 3,
+      "fecha": "2026-11-15T19:29:39.100Z",
+      "nombre_cliente": "olaris",
+      "empresa": "olaris2",
+      "correo_cliente": "olaris@xd.com",
+      "descripcion_carga": "asdasdas",
+      "peso_ingresado_kg": 60000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 1425,
+      "monto_total": 8925
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 14,
+    "fields": {
+      "id_ruta": 5,
+      "id_usuario": 3,
+      "fecha": "2026-11-15T19:37:55.029Z",
+      "nombre_cliente": "asdasd",
+      "empresa": "asasd",
+      "correo_cliente": "asdasd@asdasd.cl",
+      "descripcion_carga": "asdasdasd",
+      "peso_ingresado_kg": 60000,
+      "valor_carga_kg": null,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 2451,
+      "monto_total": 15351
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 15,
+    "fields": {
+      "id_ruta": 28,
+      "id_usuario": 3,
+      "fecha": "2026-11-15T19:57:16.383Z",
+      "nombre_cliente": "asdasdasd",
+      "empresa": "asdasd",
+      "correo_cliente": "asdasd@gmail.com",
+      "descripcion_carga": "asdasdasdas",
+      "peso_ingresado_kg": 60000,
+      "valor_carga_kg": 20000000,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 570,
+      "monto_total": 3570
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 16,
+    "fields": {
+      "id_ruta": 23,
+      "id_usuario": 3,
+      "fecha": "2026-11-15T20:06:23.834Z",
+      "nombre_cliente": "asdasd",
+      "empresa": "asdasd",
+      "correo_cliente": "asdasdasd@asdasd.com",
+      "descripcion_carga": "Fierros y otros",
+      "peso_ingresado_kg": 60000,
+      "valor_carga_kg": 20000000,
+      "tipo_contenedor": "20 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 3135,
+      "monto_total": 19635
+    }
+  },
+  {
+    "model": "Cotizador.cotizacion_generada",
+    "pk": 17,
+    "fields": {
+      "id_ruta": 14,
+      "id_usuario": 3,
+      "fecha": "2026-11-15T20:11:28.093Z",
+      "nombre_cliente": "Karen",
+      "empresa": "xdKaren",
+      "correo_cliente": "karen@xd.cl",
+      "descripcion_carga": "asdasdasd",
+      "peso_ingresado_kg": 60000,
+      "valor_carga_kg": 70000000,
+      "tipo_contenedor": "40 HQ",
+      "cantidad_contenedores": 3,
+      "monto_IVA": 684,
+      "monto_total": 4284
+    }
+  }
+]

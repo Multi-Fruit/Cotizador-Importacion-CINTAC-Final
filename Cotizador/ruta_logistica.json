@@ -1,0 +1,254 @@
+[
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 1,
+    "fields": {
+      "puerto_origen": "Shanghai, China",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 2,
+    "fields": {
+      "puerto_origen": "Ningbo, China",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 3,
+    "fields": {
+      "puerto_origen": "Shenzhen, China",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 4,
+    "fields": {
+      "puerto_origen": "Qingdao, China",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 5,
+    "fields": {
+      "puerto_origen": "Guangzhou, China",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 6,
+    "fields": {
+      "puerto_origen": "Tianjin, China",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 7,
+    "fields": {
+      "puerto_origen": "Yokohama, Japon",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 8,
+    "fields": {
+      "puerto_origen": "Tokyo, Japon",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 9,
+    "fields": {
+      "puerto_origen": "Nagoya, Japon",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 10,
+    "fields": {
+      "puerto_origen": "Kobe, Japon",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 11,
+    "fields": {
+      "puerto_origen": "Osaka, Japon",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 12,
+    "fields": {
+      "puerto_origen": "Barcelona, España",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 40
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 13,
+    "fields": {
+      "puerto_origen": "Los Angeles, EE.UU",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 35
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 14,
+    "fields": {
+      "puerto_origen": "Callao, Perú",
+      "puerto_destino": "Valparaíso, Chile",
+      "dias_transito": 7
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 15,
+    "fields": {
+      "puerto_origen": "Shanghai, China",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 16,
+    "fields": {
+      "puerto_origen": "Ningbo, China",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 17,
+    "fields": {
+      "puerto_origen": "Shenzhen, China",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 18,
+    "fields": {
+      "puerto_origen": "Qingdao, China",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 19,
+    "fields": {
+      "puerto_origen": "Guangzhou, China",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 20,
+    "fields": {
+      "puerto_origen": "Tianjin, China",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 45
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 21,
+    "fields": {
+      "puerto_origen": "Yokohama, Japon",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 22,
+    "fields": {
+      "puerto_origen": "Tokyo, Japon",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 23,
+    "fields": {
+      "puerto_origen": "Nagoya, Japon",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 24,
+    "fields": {
+      "puerto_origen": "Kobe, Japon",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 25,
+    "fields": {
+      "puerto_origen": "Osaka, Japon",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 55
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 26,
+    "fields": {
+      "puerto_origen": "Barcelona, España",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 40
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 27,
+    "fields": {
+      "puerto_origen": "Los Angeles, EE.UU",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 35
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 28,
+    "fields": {
+      "puerto_origen": "Callao, Perú",
+      "puerto_destino": "San Antonio, Chile",
+      "dias_transito": 7
+    }
+  }
+]
