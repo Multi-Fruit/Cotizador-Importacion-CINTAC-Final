@@ -250,5 +250,23 @@
       "puerto_destino": "San Antonio, Chile",
       "dias_transito": 7
     }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 29,
+    "fields": {
+      "puerto_origen": "San Antonio, Chile",
+      "puerto_destino": "Callao, Perú",
+      "dias_transito": 5
+    }
+  },
+  {
+    "model": "Cotizador.ruta_logistica",
+    "pk": 30,
+    "fields": {
+      "puerto_origen": "Valparaíso, Chile",
+      "puerto_destino": "Callao, Perú",
+      "dias_transito": 5
+    }
   }
 ]

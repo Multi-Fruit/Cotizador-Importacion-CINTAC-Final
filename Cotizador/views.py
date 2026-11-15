@@ -18,6 +18,13 @@ from .models import (
 
 USD_TO_CLP = Decimal('950')
 
+ORIGENES_CON_DESTINO_CALLAO = {
+    'San antonio, Chile',
+    'Valparaíso, Chile',
+}
+
+DESTINO_CALLAO = 'Callao, Perú'
+
 
 def _pdf_escape(value):
     return str(value).replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
@@ -237,6 +244,19 @@ def Cotizador(request):
                 return render(request, 'Cotizador/cotizador.html', context)
         else:
             valor_carga_ingresado = None
+
+        if (
+            (origen in ORIGENES_CON_DESTINO_CALLAO and destino != DESTINO_CALLAO)
+            or (
+                origen not in ORIGENES_CON_DESTINO_CALLAO
+                and destino == DESTINO_CALLAO
+            )
+        ):
+            context['error'] = (
+                'La combinación de puerto de origen y destino no es válida.'
+            )
+            context['form_data'] = request.POST
+            return render(request, 'Cotizador/cotizador.html', context)
 
         ruta = ruta_logistica.objects.filter(
             puerto_origen=origen,

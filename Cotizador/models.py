@@ -92,11 +92,14 @@ class ruta_logistica(models.Model):
         ('Barcelona, España', 'Barcelona, España'),
         ('Los Angeles, EE.UU', 'Los Angeles, EE.UU'),
         ('Callao, Perú', 'Callao, Perú'),
+        ('San antonio, Chile', 'San antonio, Chile'),
+        ('Valparaíso, Chile', 'Valparaíso, Chile')
     )
     
     PUERTOS_DESTINO = (
         ('Valparaíso, Chile', 'Valparaíso, Chile'),
         ('San Antonio, Chile', 'San Antonio, Chile'),
+        ('Callao, Perú', 'Callao, Perú'),
     )
 
     id = models.AutoField(primary_key=True)

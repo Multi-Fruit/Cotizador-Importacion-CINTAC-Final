@@ -124,6 +124,43 @@
             {% endif %}
         </div>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var origen = document.getElementById('puerto_origen');
+            var destino = document.getElementById('puerto_destino');
+            var opcionesDestino = Array.from(destino.options).slice(1);
+            var origenesConDestinoCallao = [
+                'San antonio, Chile',
+                'Valparaíso, Chile'
+            ];
+
+            function actualizarDestinos() {
+                var origenSeleccionado = origen.value;
+                var permiteCallao = origenesConDestinoCallao.includes(
+                    origenSeleccionado
+                );
+                var destinoSeleccionado = destino.value;
+
+                opcionesDestino.forEach(function (opcion) {
+                    opcion.hidden = opcion.value === 'Callao, Perú'
+                        ? !permiteCallao
+                        : permiteCallao;
+                });
+
+                if (
+                    destinoSeleccionado === 'Callao, Perú'
+                    && !permiteCallao
+                ) {
+                    destino.value = '';
+                } else if (permiteCallao) {
+                    destino.value = 'Callao, Perú';
+                }
+            }
+
+            origen.addEventListener('change', actualizarDestinos);
+            actualizarDestinos();
+        });
+    </script>
     {% if resultados %}
         <script>
             document.addEventListener('DOMContentLoaded', function () {
