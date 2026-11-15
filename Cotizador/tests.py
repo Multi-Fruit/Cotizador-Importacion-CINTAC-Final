@@ -219,8 +219,40 @@ class CotizadorViewTests(TestCase):
             f'{date.today():%d-%m-%Y}.pdf"',
         )
         self.assertTrue(report_response.content.startswith(b'%PDF-1.4'))
+        self.assertIn(b'$226.100 CLP', report_response.content)
         self.assertEqual(cotizacion_generada.objects.count(), 1)
         registro = cotizacion_generada.objects.get()
         self.assertEqual(registro.tipo_contenedor, '20 HQ')
         self.assertEqual(registro.peso_ingresado_kg, 1500)
+        self.assertIsNone(registro.valor_carga_kg)
+        history_response = self.client.get('/Cotizador/historial/')
+        self.assertContains(history_response, 'No ingresado')
         self.assertNotIn('cotizaciones_pendientes', self.client.session)
+
+    def test_valor_de_carga_se_guarda_y_aparece_en_el_informe(self):
+        response = self.client.post(
+            '/Cotizador/cotizador/',
+            {
+                'nombre_cliente': 'Cliente Con Valor',
+                'empresa': 'Empresa Cotizadora',
+                'correo_cliente': 'valor@example.com',
+                'puerto_origen': 'Shanghai, China',
+                'puerto_destino': 'Valparaíso, Chile',
+                'peso_carga': '1500',
+                'valor_carga': '75000',
+                'descripcion_carga': 'Carga valorizada',
+            },
+        )
+
+        self.assertContains(response, 'Valor de la carga')
+        report_response = self.client.post(
+            '/Cotizador/informe/',
+            {'tipo_contenedor': '20 HQ'},
+        )
+
+        self.assertEqual(report_response.status_code, 200)
+        self.assertIn(b'Valor de carga: $75.000', report_response.content)
+        registro = cotizacion_generada.objects.get()
+        self.assertEqual(registro.valor_carga_kg, 75000)
+        history_response = self.client.get('/Cotizador/historial/')
+        self.assertContains(history_response, '$75.000')

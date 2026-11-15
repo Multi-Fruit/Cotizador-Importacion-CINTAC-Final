@@ -51,6 +51,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# la sesion expira luego de 1200 segundos sin actividad.
+SESSION_COOKIE_AGE = 20 * 60
+SESSION_SAVE_EVERY_REQUEST = True
+
 ROOT_URLCONF = 'ProyectoFinal.urls'
 
 TEMPLATES = [

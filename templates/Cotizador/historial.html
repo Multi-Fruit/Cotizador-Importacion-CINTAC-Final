@@ -52,6 +52,7 @@
                                 <th>Cliente</th>
                                 <th>Ruta</th>
                                 <th>Contenedor</th>
+                                <th>Valor de carga</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
@@ -79,6 +80,9 @@
                                     </td>
                                     <td data-label="Contenedor">
                                         {{ cotizacion.cantidad_contenedores }} × {{ cotizacion.tipo_contenedor }}
+                                    </td>
+                                    <td data-label="Valor de carga">
+                                        {{ cotizacion.valor_carga_formateado }}
                                     </td>
                                     <td data-label="Total">
                                         <strong class="history-total">

@@ -36,7 +36,7 @@ class tarifa_contenedorAdmin(admin.ModelAdmin):
     
 @admin.register(cotizacion_generada)
 class cotizacion_generadaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'id_ruta', 'id_usuario', 'fecha', 'nombre_cliente', 'empresa', 'correo_cliente', 'descripcion_carga', 'peso_ingresado_kg', 'tipo_contenedor', 'cantidad_contenedores', 'monto_IVA', 'monto_total')
+    list_display = ('id', 'id_ruta', 'id_usuario', 'fecha', 'nombre_cliente', 'empresa', 'correo_cliente', 'descripcion_carga', 'peso_ingresado_kg', 'valor_carga_kg', 'tipo_contenedor', 'cantidad_contenedores', 'monto_IVA', 'monto_total')
     search_fields = ('id_ruta__puerto_origen', 'id_ruta__puerto_destino', 'id_usuario__username', 'nombre_cliente', 'empresa')
     list_filter = ('id_ruta__puerto_origen', 'id_ruta__puerto_destino', 'id_usuario__username')
     ordering = ('-fecha',)

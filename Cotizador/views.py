@@ -27,6 +27,12 @@ def _safe_filename(value):
     return re.sub(r'[<>:"/\\|?*]+', '', str(value)).strip()
 
 
+def _format_clp(value):
+    if value is None:
+        return 'No ingresado'
+    return f'${value:,.0f}'.replace(',', '.')
+
+
 def _build_quote_pdf(data, registro):
     total_clp = (
         Decimal(str(data['monto_total'])) * USD_TO_CLP
@@ -61,7 +67,7 @@ def _build_quote_pdf(data, registro):
         line(f'Contenedor: {data["tipo_contenedor"]}', 330, 610),
         line(f'Peso: {data["peso_ingresado_kg"]} kg', 330, 590),
         line('DETALLE DE LA COTIZACION', 42, 530, 'F2', 11, '0.95 0.44 0.13'),
-        box(42, 400, 528, 112, '1 1 1', True),
+        box(42, 385, 528, 127, '1 1 1', True),
         line(
             f'Ruta: {data["puerto_origen"]} -> {data["puerto_destino"]}',
             58, 488, 'F2', 10, '0.11 0.25 0.35'
@@ -71,16 +77,20 @@ def _build_quote_pdf(data, registro):
             58, 468, 'F1', 9
         ),
         line(
+            f'Valor de carga: {_format_clp(data["valor_carga_kg"])}',
+            58, 448, 'F1', 9
+        ),
+        line(
             f'Contenedores necesarios: {data["cantidad_contenedores"]}',
-            58, 440, 'F1', 10
+            58, 425, 'F1', 10
         ),
         line(
             f'Costo fijo: USD {Decimal(str(data["costo_fijo"])):.2f}',
-            330, 440, 'F1', 10
+            330, 425, 'F1', 10
         ),
         line(
             f'IVA (19%): USD {Decimal(str(data["monto_IVA"])):.2f}',
-            330, 420, 'F1', 10
+            330, 405, 'F1', 10
         ),
         box(42, 285, 528, 88, '0.11 0.19 0.23'),
         line('TOTAL ESTIMADO', 62, 345, 'F2', 11, '1 1 1'),
@@ -89,7 +99,7 @@ def _build_quote_pdf(data, registro):
             62, 315, 'F2', 24, '1 1 1'
         ),
         line('CONVERSION A PESOS CHILENOS', 330, 345, 'F2', 9, '0.95 0.44 0.13'),
-        line(f'${total_clp:,.0f} CLP', 330, 315, 'F2', 22, '1 1 1'),
+        line(f'{_format_clp(total_clp)} CLP', 330, 315, 'F2', 22, '1 1 1'),
         line(
             f'Tasa utilizada: 1 USD = ${USD_TO_CLP:,.0f} CLP',
             330, 296, 'F1', 8, '0.84 0.88 0.88'
@@ -196,6 +206,7 @@ def Cotizador(request):
         destino = request.POST.get('puerto_destino', '')
         descripcion = request.POST.get('descripcion_carga', '').strip()
         peso = request.POST.get('peso_carga', '').strip()
+        valor_carga = request.POST.get('valor_carga', '').strip()
 
         try:
             valida_nombre(nombre_cliente)
@@ -214,6 +225,18 @@ def Cotizador(request):
             context['error'] = 'Ingresa un peso de carga válido mayor que cero.'
             context['form_data'] = request.POST
             return render(request, 'Cotizador/cotizador.html', context)
+
+        if valor_carga:
+            try:
+                valor_carga_ingresado = int(valor_carga)
+                if valor_carga_ingresado < 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                context['error'] = 'Ingresa un valor de carga válido.'
+                context['form_data'] = request.POST
+                return render(request, 'Cotizador/cotizador.html', context)
+        else:
+            valor_carga_ingresado = None
 
         ruta = ruta_logistica.objects.filter(
             puerto_origen=origen,
@@ -254,6 +277,8 @@ def Cotizador(request):
                 'tipo_contenedor': tarifa.tipo_contenedor,
                 'descripcion_carga': descripcion,
                 'peso_carga': peso_carga,
+                'valor_carga': valor_carga_ingresado,
+                'valor_carga_formateado': _format_clp(valor_carga_ingresado),
                 'peso_max': tarifa.peso_max,
                 'cantidad_contenedores': cantidad,
                 'costo_fijo': costo_fijo,
@@ -269,6 +294,7 @@ def Cotizador(request):
                 'correo_cliente': resultado['correo_cliente'],
                 'descripcion_carga': resultado['descripcion_carga'],
                 'peso_ingresado_kg': resultado['peso_carga'],
+                'valor_carga_kg': resultado['valor_carga'],
                 'tipo_contenedor': resultado['tipo_contenedor'],
                 'cantidad_contenedores': resultado['cantidad_contenedores'],
                 'id_ruta': ruta.pk,
@@ -328,6 +354,7 @@ def informe(request):
                 correo_cliente=cotizacion['correo_cliente'],
                 descripcion_carga=cotizacion['descripcion_carga'],
                 peso_ingresado_kg=cotizacion['peso_ingresado_kg'],
+                valor_carga_kg=cotizacion['valor_carga_kg'],
                 tipo_contenedor=cotizacion['tipo_contenedor'],
                 cantidad_contenedores=cotizacion['cantidad_contenedores'],
                 monto_IVA=int(Decimal(cotizacion['monto_IVA'])),
@@ -363,6 +390,10 @@ def historial(request):
         cotizacion_generada.objects.select_related('id_ruta')
         .order_by('-fecha')
     )
+    for cotizacion in historial_cotizaciones:
+        cotizacion.valor_carga_formateado = _format_clp(
+            cotizacion.valor_carga_kg
+        )
 
     context = {
         'historial_cotizaciones': historial_cotizaciones,

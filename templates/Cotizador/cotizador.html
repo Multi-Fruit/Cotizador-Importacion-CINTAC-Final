@@ -79,6 +79,10 @@
                             <label for="peso_carga">Peso de la carga (kg)</label>
                             <input id="peso_carga" name="peso_carga" type="number" min="1" step="1" value="{{ form_data.peso_carga|default:'' }}" required>
                         </div>
+                        <div class="quote-field">
+                            <label for="valor_carga">Valor de la carga (CLP) (opcional)</label>
+                            <input id="valor_carga" name="valor_carga" type="number" min="0" step="1" value="{{ form_data.valor_carga|default:'' }}">
+                        </div>
                     </div>
                     <div class="quote-field">
                         <label for="descripcion_carga">Descripción de la carga</label>
@@ -101,6 +105,7 @@
                                 <div><dt>Correo</dt><dd>{{ resultado.correo_cliente }}</dd></div>
                                 <div><dt>Carga</dt><dd>{{ resultado.descripcion_carga|default:"Sin descripción" }}</dd></div>
                                 <div><dt>Peso ingresado</dt><dd>{{ resultado.peso_carga }} kg</dd></div>
+                                <div><dt>Valor de la carga (CLP)</dt><dd>{{ resultado.valor_carga_formateado }}</dd></div>
                                 <div><dt>Contenedores necesarios</dt><dd class="quote-highlight">{{ resultado.cantidad_contenedores }}</dd></div>
                                 <div><dt>Costo fijo</dt><dd>{{ resultado.moneda }} {{ resultado.costo_fijo|floatformat:2 }}</dd></div>
                                 <div><dt>IVA (19%)</dt><dd>{{ resultado.moneda }} {{ resultado.monto_iva|floatformat:2 }}</dd></div>

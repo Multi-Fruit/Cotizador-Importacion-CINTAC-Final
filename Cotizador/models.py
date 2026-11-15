@@ -130,6 +130,7 @@ class cotizacion_generada(models.Model):
     correo_cliente = models.CharField(max_length=100, validators=[validate_login_email], null=False)
     descripcion_carga = models.TextField(null=False)
     peso_ingresado_kg = models.IntegerField(null=False)
+    valor_carga_kg = models.IntegerField(null=True, blank=True)
     tipo_contenedor = models.CharField(max_length=50, null=False)
     cantidad_contenedores = models.IntegerField(null=False)
     monto_IVA = models.IntegerField(null=False)
