@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from MainCintac.views import principal
+from Cotizador.views import login
 
 urlpatterns = [
-    path("", principal),
+    path("", login),
     path('admin/', admin.site.urls),
     path("Cotizador/", include("Cotizador.urls")),
 ]

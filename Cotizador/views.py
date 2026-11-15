@@ -157,6 +157,11 @@ def login(request):
     return render(request, 'Cotizador/login.html', {'error': error})
 
 
+def logout(request):
+    request.session.flush()
+    return redirect('login')
+
+
 def Cotizador(request):
     login_id = request.session.get('login_id')
     if login_id is None or not Login.objects.filter(pk=login_id).exists():

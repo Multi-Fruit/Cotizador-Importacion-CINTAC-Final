@@ -39,6 +39,17 @@ class LoginViewTests(TestCase):
         self.assertRedirects(response, '/Cotizador/cotizador/')
         self.assertEqual(self.client.session['login_id'], self.account.pk)
 
+    def test_logout_flushes_session_and_redirects_to_login(self):
+        self.client.post(
+            '/Cotizador/login/',
+            {'username': 'usuario-prueba', 'password': 'Clave123'},
+        )
+
+        response = self.client.get('/Cotizador/logout/')
+
+        self.assertRedirects(response, '/Cotizador/login/')
+        self.assertNotIn('login_id', self.client.session)
+
     def test_cotizador_requires_an_authenticated_session(self):
         response = self.client.get('/Cotizador/cotizador/')
 
