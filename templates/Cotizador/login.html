@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Inicio de sesión del cotizador CINTAC.">
     <title>Iniciar sesión | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=login-redesign-1">
 </head>
 <body class="login-page">
-    <main class="login-main">
+    <main class="login-main" style="--login-background: url('{% static 'images/MainCintac/ImagenImportacion.avif' %}')">
         <section class="login-card" aria-labelledby="login-title">
             <a class="brand login-brand" href="/" aria-label="CINTAC inicio">
                 <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
@@ -19,7 +19,7 @@
             <p class="login-intro">Ingresa tus datos para continuar.</p>
 
             {% if error %}
-                <p role="alert" style="color: red;">{{ error }}</p>
+                <p class="login-error" role="alert">{{ error }}</p>
             {% endif %}
 
             <form class="login-form" method="post" action="{% url 'login' %}">
