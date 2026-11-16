@@ -18,6 +18,14 @@
                 <a class="dark-button quote-history" href="{% url 'historial' %}">
                     Historial
                 </a>
+                <details class="route-menu">
+                    <summary class="dark-button route-menu-toggle">Modificar rutas</summary>
+                    <div class="route-menu-links">
+                        <a href="{% url 'crear' %}">Crear ruta nueva</a>
+                        <a href="#">Editar ruta</a>
+                        <a href="#">Eliminar ruta</a>
+                    </div>
+                </details>
                 <a class="dark-button quote-logout" href="{% url 'logout' %}">
                     Cerrar sesión <span>↗</span>
                 </a>

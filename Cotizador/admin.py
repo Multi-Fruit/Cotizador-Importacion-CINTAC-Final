@@ -22,10 +22,14 @@ class loginAdmin(admin.ModelAdmin):
 
 @admin.register(ruta_logistica)
 class ruta_logisticaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'puerto_origen', 'puerto_destino', 'dias_transito')
+    list_display = ('id', 'mostrar_puerto_origen', 'puerto_destino', 'dias_transito')
     search_fields = ('puerto_origen', 'puerto_destino')
     list_filter = ('puerto_origen', 'puerto_destino')
     ordering = ('id',)
+
+    @admin.display(description='Puerto de origen', ordering='puerto_origen')
+    def mostrar_puerto_origen(self, obj):
+        return obj.puerto_origen or 'Sin puerto de origen'
 
 @admin.register(tarifa_contenedor)
 class tarifa_contenedorAdmin(admin.ModelAdmin):

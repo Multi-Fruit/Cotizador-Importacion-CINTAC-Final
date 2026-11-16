@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 
+from .forms import CrearRutaForm
 from .models import (
     Login,
     cotizacion_generada,
@@ -38,7 +39,6 @@ def _format_clp(value):
     if value is None:
         return 'No ingresado'
     return f'${value:,.0f}'.replace(',', '.')
-
 
 def _build_quote_pdf(data, registro):
     total_clp = (
@@ -420,3 +420,22 @@ def historial(request):
     }
 
     return render(request, 'Cotizador/historial.html', context)
+
+def crear(request):
+    login_id = request.session.get('login_id')
+    if login_id is None or not Login.objects.filter(pk=login_id).exists():
+        request.session.pop('login_id', None)
+        request.session['login_error'] = (
+            'Debes iniciar sesión para acceder a la creación de rutas.'
+        )
+        return redirect('login')
+
+    form = CrearRutaForm(request.POST or None)
+    context = {'form': form}
+
+    if request.method == 'POST' and form.is_valid():
+        context['created_route'] = form.save()
+        context['success'] = 'La ruta y sus tarifas fueron creadas correctamente.'
+        context['form'] = CrearRutaForm()
+
+    return render(request, 'CRUD/crear.html', context)

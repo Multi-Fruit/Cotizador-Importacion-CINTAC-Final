@@ -112,7 +112,7 @@ class ruta_logistica(models.Model):
 
 
 class tarifa_contenedor(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     id_ruta = models.ForeignKey(ruta_logistica, on_delete=models.CASCADE, null=False)
     #embarcador = models.CharField(max_length=100, choices=PROVEEDORES, null=False)
     tipo_contenedor = models.CharField(max_length=50, null=False)
