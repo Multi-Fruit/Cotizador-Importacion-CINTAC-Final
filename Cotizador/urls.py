@@ -1,5 +1,5 @@
 from django.urls import path
-from Cotizador.views import Cotizador, historial, login, logout, informe, crear, editar
+from Cotizador.views import Cotizador, eliminar, historial, login, logout, informe, crear, editar
 
 urlpatterns = [
     path('login/', login, name='login'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('crear/', crear, name='crear'),
     path('editar/', editar, name='editar'),
     path('editar/<int:ruta_id>/', editar, name='editar'),
+    path('eliminar/', eliminar, name='eliminar'),
 ]

@@ -23,7 +23,7 @@
                     <div class="route-menu-links">
                         <a href="{% url 'crear' %}">Crear ruta nueva</a>
                         <a href="{% url 'editar' %}">Editar ruta</a>
-                        <a href="#">Eliminar ruta</a>
+                        <a href="{% url 'eliminar' %}">Eliminar ruta</a>
                     </div>
                 </details>
                 <a class="dark-button quote-logout" href="{% url 'logout' %}">
@@ -113,9 +113,15 @@
                                 <span class="quote-field-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20h14l-1.5-12h-11L5 20Z"></path><path d="M9 8a3 3 0 0 1 6 0m-3 4v3m-1.5-1.5L12 12l1.5 1.5"></path></svg>
                                 </span>
-                                Peso de la carga (kg)
+                                Peso de la carga
                             </label>
-                            <input id="peso_carga" name="peso_carga" type="number" min="1" step="1" value="{{ form_data.peso_carga|default:'' }}" required>
+                            <div class="weight-input-group">
+                                <input id="peso_carga" name="peso_carga" type="number" min="1" step="1" value="{{ form_data.peso_carga|default:'' }}" required>
+                                <select id="unidad_peso" name="unidad_peso" aria-label="Unidad del peso">
+                                    <option value="kg" {% if form_data.unidad_peso != 'ton' %}selected{% endif %}>kg</option>
+                                    <option value="ton" {% if form_data.unidad_peso == 'ton' %}selected{% endif %}>ton</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="quote-field">
                             <label for="valor_carga">
@@ -213,6 +219,18 @@
 
             origen.addEventListener('change', actualizarDestinos);
             actualizarDestinos();
+
+            var peso = document.getElementById('peso_carga');
+            var unidadPeso = document.getElementById('unidad_peso');
+
+            function actualizarFormatoPeso() {
+                var esTonelada = unidadPeso.value === 'ton';
+                peso.min = esTonelada ? '0.001' : '1';
+                peso.step = esTonelada ? '0.001' : '1';
+            }
+
+            unidadPeso.addEventListener('change', actualizarFormatoPeso);
+            actualizarFormatoPeso();
         });
     </script>
     {% if resultados %}

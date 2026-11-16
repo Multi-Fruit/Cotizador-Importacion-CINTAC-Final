@@ -1,10 +1,10 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from math import ceil
 import re
 
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import CrearRutaForm
 from .models import (
@@ -213,6 +213,7 @@ def Cotizador(request):
         destino = request.POST.get('puerto_destino', '')
         descripcion = request.POST.get('descripcion_carga', '').strip()
         peso = request.POST.get('peso_carga', '').strip()
+        unidad_peso = request.POST.get('unidad_peso', 'kg')
         valor_carga = request.POST.get('valor_carga', '').strip()
 
         try:
@@ -225,10 +226,17 @@ def Cotizador(request):
             return render(request, 'Cotizador/cotizador.html', context)
 
         try:
-            peso_carga = int(peso)
+            peso_ingresado = Decimal(peso)
+            if unidad_peso not in {'kg', 'ton'} or peso_ingresado <= 0:
+                raise ValueError
+            if unidad_peso == 'kg' and peso_ingresado != peso_ingresado.to_integral_value():
+                raise ValueError
+            peso_carga = int(
+                peso_ingresado * (Decimal('1000') if unidad_peso == 'ton' else 1)
+            )
             if peso_carga <= 0:
                 raise ValueError
-        except (TypeError, ValueError):
+        except (InvalidOperation, TypeError, ValueError):
             context['error'] = 'Ingresa un peso de carga válido mayor que cero.'
             context['form_data'] = request.POST
             return render(request, 'Cotizador/cotizador.html', context)
@@ -485,3 +493,46 @@ def editar(request, ruta_id=None):
         context['selected_route_id'] = None
 
     return render(request, 'CRUD/editar.html', context)
+
+def eliminar(request, ruta_id=None):
+    login_id = request.session.get('login_id')
+    if login_id is None or not Login.objects.filter(pk=login_id).exists():
+        request.session.pop('login_id', None)
+        request.session['login_error'] = (
+            'Debes iniciar sesión para acceder a la eliminación de rutas.'
+        )
+        return redirect('login')
+
+    rutas = ruta_logistica.objects.order_by('puerto_origen', 'puerto_destino')
+
+    if ruta_id is None and request.method == 'POST':
+        selected_route_id = request.POST.get('ruta_id', '')
+        try:
+            ruta_id = int(selected_route_id)
+        except (TypeError, ValueError):
+            return render(request, 'CRUD/eliminar.html', {
+                'rutas': rutas,
+                'error': 'Selecciona una ruta válida para eliminar.',
+            })
+
+    if ruta_id is None:
+        return render(request, 'CRUD/eliminar.html', {'rutas': rutas})
+
+    ruta = get_object_or_404(ruta_logistica, pk=ruta_id)
+    if request.method == 'POST':
+        deleted_route = (
+            f'{ruta.puerto_origen} → {ruta.puerto_destino}'
+        )
+        ruta.delete()
+        return render(request, 'CRUD/eliminar.html', {
+            'rutas': ruta_logistica.objects.order_by(
+                'puerto_origen', 'puerto_destino'
+            ),
+            'success': 'La ruta fue eliminada correctamente.',
+            'deleted_route': deleted_route,
+        })
+
+    return render(request, 'CRUD/eliminar.html', {
+        'rutas': rutas,
+        'selected_route_id': ruta_id,
+    })

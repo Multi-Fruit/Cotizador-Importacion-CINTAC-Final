@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Eliminar una ruta logística CINTAC.">
+    <title>Eliminar ruta | CINTAC</title>
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-2">
+</head>
+<body class="quote-page cotizador-page">
+    <header class="quote-header">
+        <div class="container nav-wrap">
+            <a class="brand" href="/" aria-label="CINTAC inicio">
+                <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
+            </a>
+            <div class="quote-actions">
+                <a class="dark-button quote-history" href="{% url 'cotizador' %}">
+                    Cotizador
+                </a>
+                <a class="dark-button quote-logout" href="{% url 'logout' %}">
+                    Cerrar sesión <span>↗</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="quote-main container">
+        <section class="quote-intro quote-banner" style="--quote-banner-image: url('{% static 'images/MainCintac/fotopuerto.avif' %}')">
+            <p class="eyebrow orange">ADMINISTRACIÓN DE RUTAS</p>
+            <h1>Eliminar una ruta logística</h1>
+            <p>Selecciona la ruta que deseas eliminar del sistema.</p>
+        </section>
+
+        <section class="quote-card" aria-labelledby="delete-route-title">
+            <h2 id="delete-route-title">Ruta que deseas eliminar</h2>
+            {% if success %}
+                <p class="quote-alert quote-success" role="status">{{ success }}</p>
+                <p class="quote-route quote-success">
+                    Ruta eliminada: {{ deleted_route }}
+                </p>
+            {% endif %}
+            {% if error %}
+                <p class="quote-alert" role="alert">{{ error }}</p>
+            {% endif %}
+            {% if rutas %}
+                <form class="quote-form" method="post" action="{% url 'eliminar' %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta ruta?');">
+                    {% csrf_token %}
+                    <div class="quote-field">
+                        <label for="ruta_id">Ruta logística</label>
+                        <select id="ruta_id" name="ruta_id" required>
+                            <option value="">Selecciona una ruta</option>
+                            {% for ruta in rutas %}
+                                <option
+                                    value="{{ ruta.id }}"
+                                    {% if ruta.id == selected_route_id %}selected{% endif %}
+                                >
+                                    {{ ruta.puerto_origen }} → {{ ruta.puerto_destino }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="dark-button quote-submit" type="submit">
+                        Eliminar ruta <span>↗</span>
+                    </button>
+                </form>
+            {% else %}
+                <p class="quote-route">No hay rutas disponibles para eliminar.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

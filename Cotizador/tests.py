@@ -257,6 +257,74 @@ class CotizadorViewTests(TestCase):
         history_response = self.client.get('/Cotizador/historial/')
         self.assertContains(history_response, '$75.000')
 
+    def test_convierte_toneladas_a_kilogramos(self):
+        response = self.client.post(
+            '/Cotizador/cotizador/',
+            {
+                'nombre_cliente': 'Cliente Toneladas',
+                'empresa': 'Empresa Cotizadora',
+                'correo_cliente': 'toneladas@example.com',
+                'puerto_origen': 'Shanghai, China',
+                'puerto_destino': 'Valparaíso, Chile',
+                'peso_carga': '1.5',
+                'unidad_peso': 'ton',
+                'descripcion_carga': 'Carga pesada',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '1500 kg')
+        self.assertEqual(
+            response.context['resultados'][0]['peso_carga'],
+            1500,
+        )
+
+
+class EliminarRutaViewTests(TestCase):
+    def setUp(self):
+        account = Login.objects.create(
+            username='usuario-eliminar',
+            password='Clave123',
+            email='eliminar@example.com',
+        )
+        self.route = ruta_logistica.objects.create(
+            puerto_origen='Shanghai, China',
+            puerto_destino='Valparaíso, Chile',
+            dias_transito=30,
+        )
+        self.client.post(
+            '/Cotizador/login/',
+            {'username': account.username, 'password': account.password},
+        )
+
+    def test_muestra_las_rutas_en_un_desplegable(self):
+        response = self.client.get('/Cotizador/eliminar/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="ruta_id"')
+        self.assertContains(response, 'Shanghai, China')
+        self.assertContains(response, 'Valparaíso, Chile')
+
+    def test_elimina_la_ruta_seleccionada(self):
+        remaining_route = ruta_logistica.objects.create(
+            puerto_origen='Ningbo, China',
+            puerto_destino='San Antonio, Chile',
+            dias_transito=32,
+        )
+        response = self.client.post(
+            '/Cotizador/eliminar/',
+            {'ruta_id': self.route.pk},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'La ruta fue eliminada correctamente.')
+        self.assertContains(response, 'Ruta eliminada: Shanghai, China')
+        self.assertContains(response, 'Ningbo, China')
+        self.assertContains(response, str(remaining_route.puerto_destino))
+        self.assertFalse(
+            ruta_logistica.objects.filter(pk=self.route.pk).exists()
+        )
+
 
 class EditarViewTests(TestCase):
     def setUp(self):
