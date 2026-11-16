@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Cotizador de transporte marítimo CINTAC.">
     <title>Cotizador | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-1">
 </head>
-<body class="quote-page">
+<body class="quote-page cotizador-page">
     <header class="quote-header">
         <div class="container nav-wrap">
             <a class="brand" href="/" aria-label="CINTAC inicio">
@@ -50,19 +50,39 @@
                     {% csrf_token %}
                     <div class="quote-fields">
                         <div class="quote-field">
-                            <label for="nombre_cliente">Nombre del cliente</label>
+                            <label for="nombre_cliente">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 21a7 7 0 0 1 14 0"></path></svg>
+                                </span>
+                                Nombre del cliente
+                            </label>
                             <input id="nombre_cliente" name="nombre_cliente" type="text" maxlength="100" value="{{ form_data.nombre_cliente|default:'' }}" required>
                         </div>
                         <div class="quote-field">
-                            <label for="empresa">Empresa</label>
+                            <label for="empresa">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M2 21h20M8 7h1m3 0h1M8 11h1m3 0h1M9 21v-4h4v4"></path><path d="M16 9h2a2 2 0 0 1 2 2v10"></path></svg>
+                                </span>
+                                Empresa
+                            </label>
                             <input id="empresa" name="empresa" type="text" maxlength="100" value="{{ form_data.empresa|default:'' }}" required>
                         </div>
                         <div class="quote-field">
-                            <label for="correo_cliente">Correo del cliente</label>
+                            <label for="correo_cliente">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+                                </span>
+                                Correo del cliente
+                            </label>
                             <input id="correo_cliente" name="correo_cliente" type="email" maxlength="100" value="{{ form_data.correo_cliente|default:'' }}" required>
                         </div>
                         <div class="quote-field">
-                            <label for="puerto_origen">Puerto de origen</label>
+                            <label for="puerto_origen">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V9m0 0a3 3 0 1 0-3-3m3 3a3 3 0 1 1 3-3M5 13l7 3 7-3M4 13l-2 5a12 12 0 0 0 20 0l-2-5"></path></svg>
+                                </span>
+                                Puerto de origen
+                            </label>
                             <select id="puerto_origen" name="puerto_origen" required>
                                 <option value="">Selecciona un puerto</option>
                                 {% for puerto in puertos_origen %}
@@ -73,7 +93,12 @@
                             </select>
                         </div>
                         <div class="quote-field">
-                            <label for="puerto_destino">Puerto de destino</label>
+                            <label for="puerto_destino">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V9m0 0a3 3 0 1 0-3-3m3 3a3 3 0 1 1 3-3M5 13l7 3 7-3M4 13l-2 5a12 12 0 0 0 20 0l-2-5"></path></svg>
+                                </span>
+                                Puerto de destino
+                            </label>
                             <select id="puerto_destino" name="puerto_destino" required>
                                 <option value="">Selecciona un puerto</option>
                                 {% for puerto in puertos_destino %}
@@ -84,19 +109,40 @@
                             </select>
                         </div>
                         <div class="quote-field">
-                            <label for="peso_carga">Peso de la carga (kg)</label>
+                            <label for="peso_carga">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20h14l-1.5-12h-11L5 20Z"></path><path d="M9 8a3 3 0 0 1 6 0m-3 4v3m-1.5-1.5L12 12l1.5 1.5"></path></svg>
+                                </span>
+                                Peso de la carga (kg)
+                            </label>
                             <input id="peso_carga" name="peso_carga" type="number" min="1" step="1" value="{{ form_data.peso_carga|default:'' }}" required>
                         </div>
                         <div class="quote-field">
-                            <label for="valor_carga">Valor de la carga (CLP) (opcional)</label>
+                            <label for="valor_carga">
+                                <span class="quote-field-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M16 8.5c-.7-.6-1.7-1-3-1-1.8 0-3 .8-3 2s1.2 1.8 3 2 3 .8 3 2-1.2 2-3 2c-1.3 0-2.4-.4-3.1-1.1M12 6v12"></path></svg>
+                                </span>
+                                Valor de la carga (CLP) (opcional)
+                            </label>
                             <input id="valor_carga" name="valor_carga" type="number" min="0" step="1" value="{{ form_data.valor_carga|default:'' }}">
                         </div>
                     </div>
                     <div class="quote-field">
-                        <label for="descripcion_carga">Descripción de la carga</label>
+                        <label for="descripcion_carga">
+                            <span class="quote-field-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6M8 13h8m-8 4h8"></path></svg>
+                            </span>
+                            Descripción de la carga
+                        </label>
                         <textarea id="descripcion_carga" name="descripcion_carga" rows="4" placeholder="Describe brevemente la carga" required>{{ form_data.descripcion_carga|default:'' }}</textarea>
                     </div>
-                    <button class="dark-button quote-submit" type="submit">Calcular cotización <span>↗</span></button>
+                    <button class="dark-button quote-submit" type="submit">
+                        <span class="quote-submit-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 3h2m4 0h2"></path></svg>
+                            Calcular cotización
+                        </span>
+                        <span class="quote-submit-arrow" aria-hidden="true">↗</span>
+                    </button>
                 </form>
             </section>
 
