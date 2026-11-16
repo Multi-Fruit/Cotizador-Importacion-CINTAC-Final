@@ -439,3 +439,47 @@ def crear(request):
         context['form'] = CrearRutaForm()
 
     return render(request, 'CRUD/crear.html', context)
+
+def editar(request, ruta_id=None):
+    login_id = request.session.get('login_id')
+    if login_id is None or not Login.objects.filter(pk=login_id).exists():
+        request.session.pop('login_id', None)
+        request.session['login_error'] = (
+            'Debes iniciar sesión para acceder a la edición de rutas.'
+        )
+        return redirect('login')
+
+    rutas = ruta_logistica.objects.order_by('puerto_origen', 'puerto_destino')
+    if ruta_id is None:
+        selected_route_id = request.GET.get('ruta_id')
+        if selected_route_id:
+            try:
+                ruta_id = int(selected_route_id)
+            except (TypeError, ValueError):
+                return render(request, 'CRUD/editar.html', {
+                    'rutas': rutas,
+                    'error': 'Selecciona una ruta válida para editar.',
+                })
+        else:
+            return render(request, 'CRUD/editar.html', {'rutas': rutas})
+
+    ruta = ruta_logistica.objects.filter(pk=ruta_id).first()
+    if ruta is None:
+        return render(request, 'CRUD/editar.html', {
+            'rutas': rutas,
+            'error': 'La ruta especificada no existe.',
+        })
+
+    form = CrearRutaForm(request.POST or None, instance=ruta)
+    context = {
+        'form': form,
+        'ruta': ruta,
+        'rutas': rutas,
+        'selected_route_id': ruta_id,
+    }
+
+    if request.method == 'POST' and form.is_valid():
+        context['updated_route'] = form.save()
+        context['success'] = 'La ruta y sus tarifas fueron actualizadas correctamente.'
+
+    return render(request, 'CRUD/editar.html', context)

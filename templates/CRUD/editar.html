@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editar una ruta logística CINTAC.">
+    <title>Editar ruta | CINTAC</title>
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}">
+</head>
+<body class="quote-page">
+    <header class="quote-header">
+        <div class="container nav-wrap">
+            <a class="brand" href="/" aria-label="CINTAC inicio">
+                <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
+            </a>
+            <div class="quote-actions">
+                <a class="dark-button quote-history" href="{% url 'cotizador' %}">
+                    Cotizador
+                </a>
+                <a class="dark-button quote-logout" href="{% url 'logout' %}">
+                    Cerrar sesión <span>↗</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="quote-main container">
+        <section class="quote-intro">
+            <p class="eyebrow orange">ADMINISTRACIÓN DE RUTAS</p>
+            <h1>Editar una ruta logística</h1>
+            <p>Actualiza los datos de la ruta y sus tarifas de contenedor.</p>
+        </section>
+
+        <section class="quote-card" aria-labelledby="edit-route-title">
+            <h2 id="edit-route-title">Datos de la ruta</h2>
+            {% if rutas %}
+                <div class="quote-field">
+                    <form class="quote-form" method="get" action="{% url 'editar' %}">
+                        <label for="ruta_id">Ruta que deseas editar</label>
+                        <select
+                            id="ruta_id"
+                            name="ruta_id"
+                            class="route-form-control"
+                            required
+                        >
+                            <option value="">Selecciona una ruta</option>
+                            {% for ruta_disponible in rutas %}
+                                <option
+                                    value="{{ ruta_disponible.id }}"
+                                    {% if ruta_disponible.id == selected_route_id %}selected{% endif %}
+                                >
+                                    {{ ruta_disponible.puerto_origen }} →
+                                    {{ ruta_disponible.puerto_destino }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button class="dark-button quote-submit" type="submit">
+                            Cargar ruta <span>↗</span>
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+            {% if error %}
+                <p class="quote-alert" role="alert">{{ error }}</p>
+            {% endif %}
+            {% if success %}
+                <p class="quote-alert" role="status">{{ success }}</p>
+                <p class="quote-route">
+                    Ruta actualizada: {{ updated_route.puerto_origen }} →
+                    {{ updated_route.puerto_destino }}
+                </p>
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="quote-alert" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% if form %}
+                <form class="quote-form" method="post">
+                    {% csrf_token %}
+                    <div class="quote-fields">
+                        <div class="quote-field">
+                            {{ form.puerto_origen.label_tag }}
+                            {{ form.puerto_origen }}
+                            {{ form.puerto_origen.errors }}
+                        </div>
+                        <div class="quote-field">
+                            {{ form.puerto_destino.label_tag }}
+                            {{ form.puerto_destino }}
+                            {{ form.puerto_destino.errors }}
+                        </div>
+                        <div class="quote-field">
+                            {{ form.dias_transito.label_tag }}
+                            {{ form.dias_transito }}
+                            {{ form.dias_transito.errors }}
+                        </div>
+                        <div class="quote-field">
+                            {{ form.peso_max_20hq.label_tag }}
+                            {{ form.peso_max_20hq }}
+                            {{ form.peso_max_20hq.errors }}
+                        </div>
+                        <div class="quote-field">
+                            {{ form.costo_fijo_20hq.label_tag }}
+                            {{ form.costo_fijo_20hq }}
+                            {{ form.costo_fijo_20hq.errors }}
+                        </div>
+                        <div class="quote-field">
+                            {{ form.peso_max_40hq.label_tag }}
+                            {{ form.peso_max_40hq }}
+                            {{ form.peso_max_40hq.errors }}
+                        </div>
+                        <div class="quote-field">
+                            {{ form.costo_fijo_40hq.label_tag }}
+                            {{ form.costo_fijo_40hq }}
+                            {{ form.costo_fijo_40hq.errors }}
+                        </div>
+                    </div>
+                    <button class="dark-button quote-submit" type="submit">
+                        Guardar cambios <span>↗</span>
+                    </button>
+                </form>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
