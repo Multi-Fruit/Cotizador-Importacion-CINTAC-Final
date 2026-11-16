@@ -33,6 +33,13 @@
         </section>
 
         <section class="quote-card" aria-labelledby="edit-route-title">
+            {% if success %}
+                <p class="quote-alert quote-success" role="status">{{ success }}</p>
+                <p class="quote-route quote-success" >
+                    Ruta actualizada: {{ updated_route.puerto_origen }} →
+                    {{ updated_route.puerto_destino }}
+                </p>
+            {% endif %}
             <h2 id="edit-route-title">Datos de la ruta</h2>
             {% if rutas %}
                 <div class="quote-field">
@@ -63,13 +70,6 @@
             {% endif %}
             {% if error %}
                 <p class="quote-alert" role="alert">{{ error }}</p>
-            {% endif %}
-            {% if success %}
-                <p class="quote-alert" role="status">{{ success }}</p>
-                <p class="quote-route">
-                    Ruta actualizada: {{ updated_route.puerto_origen }} →
-                    {{ updated_route.puerto_destino }}
-                </p>
             {% endif %}
             {% if form.non_field_errors %}
                 <div class="quote-alert" role="alert">{{ form.non_field_errors }}</div>

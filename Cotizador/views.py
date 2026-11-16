@@ -480,6 +480,8 @@ def editar(request, ruta_id=None):
 
     if request.method == 'POST' and form.is_valid():
         context['updated_route'] = form.save()
-        context['success'] = 'La ruta y sus tarifas fueron actualizadas correctamente.'
+        context['success'] = 'Se ha actualizado la ruta'
+        context['form'] = None
+        context['selected_route_id'] = None
 
     return render(request, 'CRUD/editar.html', context)

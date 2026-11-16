@@ -292,6 +292,16 @@ h2 { font-size:clamp(35px,4vw,53px); letter-spacing:.005em; }
     border-left-width:4px;
     border-radius:0 2px 2px 0;
 }
+.quote-page .quote-success {
+    border-color:#76c893;
+    background:#eaf8ed;
+    color:#247a3b;
+}
+.quote-page .quote-route.quote-success {
+    border-color:#76c893;
+    background:#eaf8ed;
+    color:#247a3b;
+}
 .quote-page .quote-result {
     position:relative;
     background:linear-gradient(155deg, #fff 0%, #fff 72%, #fff7f2 100%);

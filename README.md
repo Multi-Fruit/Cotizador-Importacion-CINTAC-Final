@@ -206,6 +206,8 @@ visualicen correctamente.
 | `/Cotizador/historial/` | Historial de cotizaciones |
 | `/Cotizador/informe/` | Informe de cotizaciones |
 | `/Cotizador/crear/` | Creación de rutas y tarifas |
+| `/Cotizador/editar/` | Edición de rutas y tarifas |
+| `/Cotizador/eliminar/` | Eliminación de rutas y tarifas |
 | `/admin/` | Administración de Django |
 
 ## Seguridad

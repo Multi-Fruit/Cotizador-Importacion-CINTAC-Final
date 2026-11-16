@@ -256,3 +256,58 @@ class CotizadorViewTests(TestCase):
         self.assertEqual(registro.valor_carga_kg, 75000)
         history_response = self.client.get('/Cotizador/historial/')
         self.assertContains(history_response, '$75.000')
+
+
+class EditarViewTests(TestCase):
+    def setUp(self):
+        account = Login.objects.create(
+            username='usuario-edicion',
+            password='Clave123',
+            email='edicion@example.com',
+        )
+        self.route = ruta_logistica.objects.create(
+            puerto_origen='Shanghai, China',
+            puerto_destino='Valparaíso, Chile',
+            dias_transito=30,
+        )
+        tarifa_contenedor.objects.create(
+            id=301,
+            id_ruta=self.route,
+            tipo_contenedor='20 HQ',
+            peso_max=23000,
+            costo_fijo=100,
+        )
+        tarifa_contenedor.objects.create(
+            id=302,
+            id_ruta=self.route,
+            tipo_contenedor='40 HQ',
+            peso_max=25000,
+            costo_fijo=150,
+        )
+        self.client.post(
+            '/Cotizador/login/',
+            {'username': account.username, 'password': account.password},
+        )
+
+    def test_actualizar_ruta_vuelve_a_mostrar_selector(self):
+        response = self.client.post(
+            f'/Cotizador/editar/{self.route.pk}/',
+            {
+                'puerto_origen': 'Shanghai, China',
+                'puerto_destino': 'Valparaiso, Chile',
+                'dias_transito': '31',
+                'peso_max_20hq': '23000',
+                'costo_fijo_20hq': '110',
+                'peso_max_40hq': '25000',
+                'costo_fijo_40hq': '160',
+            },
+        )
+
+        self.assertContains(response, 'Se ha actualizado la ruta')
+        self.assertContains(response, 'Ruta que deseas editar')
+        self.assertContains(response, 'Cargar ruta')
+        self.assertNotContains(response, 'Guardar cambios')
+        self.assertNotContains(
+            response,
+            f'<option value="{self.route.pk}" selected',
+        )

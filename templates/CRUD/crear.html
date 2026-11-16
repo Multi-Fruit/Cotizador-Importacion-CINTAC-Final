@@ -35,8 +35,8 @@
         <section class="quote-card" aria-labelledby="create-route-title">
             <h2 id="create-route-title">Datos de la ruta</h2>
             {% if success %}
-                <p class="quote-alert" role="status">{{ success }}</p>
-                <p class="quote-route">
+                <p class="quote-alert quote-success" role="status">{{ success }}</p>
+                <p class="quote-route quote-success">
                     Ruta guardada: {{ created_route.puerto_origen }} →
                     {{ created_route.puerto_destino }}
                 </p>
