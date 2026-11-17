@@ -188,9 +188,15 @@ ni usar SQLite como base de datos de producción.
    DATABASE_URL=<cadena privada de Neon>
    SECRET_KEY=<clave aleatoria nueva>
    DEBUG=False
-   ALLOWED_HOSTS=<dominio-vercel>,<dominio-personalizado-si-existe>
-   CSRF_TRUSTED_ORIGINS=https://<dominio-vercel>
+   ALLOWED_HOSTS=<dominio-personalizado-si-existe>
+   CSRF_TRUSTED_ORIGINS=https://<dominio-personalizado-si-existe>
    ```
+
+   Vercel proporciona automáticamente la variable `VERCEL_URL` con el dominio
+   del despliegue. La configuración de Django la agrega a `ALLOWED_HOSTS` y
+   `CSRF_TRUSTED_ORIGINS`, por lo que no es necesario copiar manualmente cada
+   dominio `*.vercel.app`. Si usas un dominio personalizado, agrégalo en las
+   variables anteriores.
 
    Para generar una clave localmente:
 
