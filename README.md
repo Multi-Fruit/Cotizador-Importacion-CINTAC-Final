@@ -175,26 +175,44 @@ También se recomienda definir en el entorno de producción:
 
 ## Despliegue en Vercel
 
-Vercel permite publicar las vistas HTML y el servicio Django para que la
-aplicación pueda ser visualizada desde un dominio web. El despliegue debe
-configurarse para ejecutar el punto de entrada WSGI de
-`ProyectoFinal.wsgi` y debe incluir las variables de entorno de producción,
-especialmente `DATABASE_URL`.
+El proyecto contiene `manage.py` y `ProyectoFinal.wsgi`, por lo que Vercel
+puede detectar la aplicación Django automáticamente. No se debe subir `.env`
+ni usar SQLite como base de datos de producción.
 
-Pasos generales:
+1. En Neon, crea una base PostgreSQL y copia su cadena de conexión.
+2. En Vercel, selecciona **Add New Project**, importa este repositorio y deja
+   la raíz del proyecto donde está `manage.py`.
+3. En **Settings > Environment Variables**, agrega:
 
-1. Importar el repositorio en Vercel.
-2. Configurar el proyecto como una aplicación Python/Django.
-3. Definir `DATABASE_URL`, `SECRET_KEY`, `DEBUG` y `ALLOWED_HOSTS` en las
-   variables de entorno de Vercel.
-4. Ejecutar las migraciones de Django sobre la base de datos de Neon.
-5. Realizar el despliegue y comprobar el acceso a `/`, `/Cotizador/login/` y
-   `/admin/`.
+   ```text
+   DATABASE_URL=<cadena privada de Neon>
+   SECRET_KEY=<clave aleatoria nueva>
+   DEBUG=False
+   ALLOWED_HOSTS=<dominio-vercel>,<dominio-personalizado-si-existe>
+   CSRF_TRUSTED_ORIGINS=https://<dominio-vercel>
+   ```
 
-Los archivos HTML se encuentran en `templates/`, mientras que los estilos e
-imágenes se encuentran en `ProyectoFinal/static/`. La configuración de
-archivos estáticos debe habilitarse en Vercel para que las vistas se
-visualicen correctamente.
+   Para generar una clave localmente:
+
+   ```powershell
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+
+4. Ejecuta las migraciones contra Neon desde un entorno local configurado con
+   la misma `DATABASE_URL`:
+
+   ```powershell
+   python manage.py migrate
+   ```
+
+5. Haz **Deploy** en Vercel y comprueba `/`, `/Cotizador/login/` y `/admin/`.
+   Los despliegues posteriores se harán automáticamente desde la rama
+   configurada.
+
+Vercel sirve la aplicación mediante `ProyectoFinal.wsgi.application`.
+`STATIC_ROOT` está configurado para que la colección de archivos estáticos se
+realice durante el proceso de despliegue. Si cambias el dominio, actualiza
+también `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS`.
 
 ## Rutas principales
 
