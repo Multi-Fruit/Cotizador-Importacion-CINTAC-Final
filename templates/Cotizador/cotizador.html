@@ -118,8 +118,8 @@
                             <div class="weight-input-group">
                                 <input id="peso_carga" name="peso_carga" type="number" min="1" step="1" value="{{ form_data.peso_carga|default:'' }}" required>
                                 <select id="unidad_peso" name="unidad_peso" aria-label="Unidad del peso">
-                                    <option value="kg" {% if form_data.unidad_peso != 'ton' %}selected{% endif %}>kg</option>
-                                    <option value="ton" {% if form_data.unidad_peso == 'ton' %}selected{% endif %}>ton</option>
+                                    <option value="kg" {% if form_data.unidad_peso != 'ton' and form_data.unidad_peso != 't' %}selected{% endif %}>kg</option>
+                                    <option value="t" {% if form_data.unidad_peso == 'ton' or form_data.unidad_peso == 't' %}selected{% endif %}>t</option>
                                 </select>
                             </div>
                         </div>
@@ -224,7 +224,7 @@
             var unidadPeso = document.getElementById('unidad_peso');
 
             function actualizarFormatoPeso() {
-                var esTonelada = unidadPeso.value === 'ton';
+                var esTonelada = unidadPeso.value === 't';
                 peso.min = esTonelada ? '0.001' : '1';
                 peso.step = esTonelada ? '0.001' : '1';
             }

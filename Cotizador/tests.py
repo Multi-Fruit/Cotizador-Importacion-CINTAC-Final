@@ -258,6 +258,12 @@ class CotizadorViewTests(TestCase):
         self.assertContains(history_response, '$75.000')
 
     def test_convierte_toneladas_a_kilogramos(self):
+        for unidad in ('t', 'ton'):
+            for peso in ('1.5', '1,5'):
+                with self.subTest(unidad=unidad, peso=peso):
+                    self.comprobar_conversion_toneladas(unidad, peso)
+
+    def comprobar_conversion_toneladas(self, unidad, peso):
         response = self.client.post(
             '/Cotizador/cotizador/',
             {
@@ -266,8 +272,8 @@ class CotizadorViewTests(TestCase):
                 'correo_cliente': 'toneladas@example.com',
                 'puerto_origen': 'Shanghai, China',
                 'puerto_destino': 'Valparaíso, Chile',
-                'peso_carga': '1.5',
-                'unidad_peso': 'ton',
+                'peso_carga': peso,
+                'unidad_peso': unidad,
                 'descripcion_carga': 'Carga pesada',
             },
         )

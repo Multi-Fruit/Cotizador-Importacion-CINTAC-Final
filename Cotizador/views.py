@@ -214,6 +214,8 @@ def Cotizador(request):
         descripcion = request.POST.get('descripcion_carga', '').strip()
         peso = request.POST.get('peso_carga', '').strip()
         unidad_peso = request.POST.get('unidad_peso', 'kg')
+        if unidad_peso == 't':
+            unidad_peso = 'ton'
         valor_carga = request.POST.get('valor_carga', '').strip()
 
         try:
@@ -226,14 +228,21 @@ def Cotizador(request):
             return render(request, 'Cotizador/cotizador.html', context)
 
         try:
-            peso_ingresado = Decimal(peso)
-            if unidad_peso not in {'kg', 'ton'} or peso_ingresado <= 0:
+            peso_ingresado = Decimal(peso.replace(',', '.'))
+            if (
+                unidad_peso not in {'kg', 'ton'}
+                or not peso_ingresado.is_finite()
+                or peso_ingresado <= 0
+            ):
                 raise ValueError
             if unidad_peso == 'kg' and peso_ingresado != peso_ingresado.to_integral_value():
                 raise ValueError
-            peso_carga = int(
+            peso_en_kg = (
                 peso_ingresado * (Decimal('1000') if unidad_peso == 'ton' else 1)
             )
+            if peso_en_kg != peso_en_kg.to_integral_value():
+                raise ValueError
+            peso_carga = int(peso_en_kg)
             if peso_carga <= 0:
                 raise ValueError
         except (InvalidOperation, TypeError, ValueError):
