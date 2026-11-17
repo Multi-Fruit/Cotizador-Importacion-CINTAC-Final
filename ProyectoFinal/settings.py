@@ -42,7 +42,29 @@ def _environment_values(name):
     ]
 
 
-ALLOWED_HOSTS = ['cotizador-importacion-cintac-final-alpha.vercel.app']
+vercel_url = os.getenv('VERCEL_URL', '').strip()
+vercel_host = vercel_url.removeprefix('https://').removeprefix('http://').rstrip('/')
+
+ALLOWED_HOSTS = _environment_values('ALLOWED_HOSTS')
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+if vercel_host and vercel_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(vercel_host)
+
+CSRF_TRUSTED_ORIGINS = _environment_values('CSRF_TRUSTED_ORIGINS')
+if vercel_host:
+    vercel_origin = f'https://{vercel_host}'
+    if vercel_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(vercel_origin)
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Application definition
 
