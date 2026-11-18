@@ -42,20 +42,37 @@ def _environment_values(name):
     ]
 
 
-vercel_url = os.getenv('VERCEL_URL', '').strip()
-vercel_host = vercel_url.removeprefix('https://').removeprefix('http://').rstrip('/')
-
 ALLOWED_HOSTS = _environment_values('ALLOWED_HOSTS')
 if not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-if vercel_host and vercel_host not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(vercel_host)
+
+VERCEL_HOST_NAMES = (
+    'cotizador-importacion-cintac-final-alpha.vercel.app',
+    os.getenv('VERCEL_PROJECT_PRODUCTION_URL', '').strip(),
+    os.getenv('VERCEL_URL', '').strip(),
+)
+for vercel_host_name in VERCEL_HOST_NAMES:
+    vercel_host = (
+        vercel_host_name
+        .removeprefix('https://')
+        .removeprefix('http://')
+        .rstrip('/')
+    )
+    if vercel_host and vercel_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(vercel_host)
 
 CSRF_TRUSTED_ORIGINS = _environment_values('CSRF_TRUSTED_ORIGINS')
-if vercel_host:
-    vercel_origin = f'https://{vercel_host}'
-    if vercel_origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(vercel_origin)
+for vercel_host_name in VERCEL_HOST_NAMES:
+    vercel_host = (
+        vercel_host_name
+        .removeprefix('https://')
+        .removeprefix('http://')
+        .rstrip('/')
+    )
+    if vercel_host:
+        vercel_origin = f'https://{vercel_host}'
+        if vercel_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(vercel_origin)
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

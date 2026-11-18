@@ -192,11 +192,12 @@ ni usar SQLite como base de datos de producción.
    CSRF_TRUSTED_ORIGINS=https://<dominio-personalizado-si-existe>
    ```
 
-   Vercel proporciona automáticamente la variable `VERCEL_URL` con el dominio
-   del despliegue. La configuración de Django la agrega a `ALLOWED_HOSTS` y
-   `CSRF_TRUSTED_ORIGINS`, por lo que no es necesario copiar manualmente cada
-   dominio `*.vercel.app`. Si usas un dominio personalizado, agrégalo en las
-   variables anteriores.
+   Vercel proporciona automáticamente las variables `VERCEL_URL` y
+   `VERCEL_PROJECT_PRODUCTION_URL`. La configuración de Django las agrega a
+   `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS`. El dominio de producción
+   `cotizador-importacion-cintac-final-alpha.vercel.app` también está incluido
+   directamente para evitar que Django rechace la petición mientras el entorno
+   no tenga esas variables disponibles.
 
    Para generar una clave localmente:
 
