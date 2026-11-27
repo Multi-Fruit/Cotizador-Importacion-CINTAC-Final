@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Cotizador de transporte marítimo CINTAC.">
     <title>Cotizador | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-2">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=costos-opcionales-1">
 </head>
 <body class="quote-page cotizador-page">
     <header class="quote-header">
         <div class="container nav-wrap">
-            <a class="brand" href="#" aria-label="CINTAC inicio">
+            <a class="brand" href="{% url 'cotizador' %}" aria-label="Ir al cotizador">
                 <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
             </a>
             <div class="quote-actions">
@@ -32,6 +32,7 @@
             </div>
         </div>
     </header>
+    {% include 'Cotizador/barra_sesion.html' %}
 
     <main class="quote-main container">
         <section class="quote-intro quote-banner" style="--quote-banner-image: url('{% static 'images/MainCintac/fotopuerto.avif' %}')">
@@ -40,14 +41,63 @@
             <p>Ingresa los datos de la carga para estimar la cantidad de contenedores y el costo de envío.</p>
         </section>
 
+        {% if tarifas_actuales %}
+        <section class="rate-strip" aria-label="Tarifas por contenedor">
+            <strong class="rate-label">Tarifas por contenedor</strong>
+            <div class="rate-sizes" aria-hidden="true"><b>20 HQ</b><b>40 HQ</b></div>
+            <div class="rate-window" tabindex="0" aria-label="Lista de tarifas, desplazamiento horizontal">
+                <div class="rate-track">
+                    <div class="rate-list">
+                        {% for fila in tarifas_actuales %}
+                        <span class="rate-entry" data-operacion="{{ fila.ruta.operacion }}">
+                            <span aria-label="20 HQ"><strong>{{ fila.ruta.origen_visible }} → {{ fila.ruta.puerto_destino }}</strong> · {{ fila.precio_20|default:"Sin tarifa" }}</span>
+                            <span aria-label="40 HQ"><strong>{{ fila.ruta.origen_visible }} → {{ fila.ruta.puerto_destino }}</strong> · {{ fila.precio_40|default:"Sin tarifa" }}</span>
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <span class="rate-empty" hidden>Sin tarifas para esta operación.</span>
+            </div>
+            <button class="rate-toggle" type="button" aria-label="Pausar el carril de tarifas" hidden>
+                <span aria-hidden="true">Ⅱ</span>
+            </button>
+        </section>
+        <script src="{% static 'js/tarifas.js' %}?v=dolar-observado-1" defer></script>
+        {% endif %}
+
+        <section class="fx-strip" aria-label="Dólar observado">
+            <strong class="rate-label">Dólar observado</strong>
+            {% if dolar %}
+                <span>1 USD = <strong>${{ valor_dolar }} CLP</strong></span>
+                <small>{% if dolar_anterior %}Último dato disponible · {% endif %}{{ dolar.fecha|date:"d/m/Y" }} · Banco Central de Chile</small>
+            {% else %}
+                <span>Conversión a CLP pendiente</span>
+            {% endif %}
+        </section>
+        <details class="fx-manual" {% if form_data.tasa_manual or error_manual %}open{% endif %}>
+            <summary>Tipo de cambio de emergencia</summary>
+            <div class="quote-field">
+                <label for="tasa_manual">Tasa manual (CLP por 1 USD)</label>
+                <input id="tasa_manual" name="tasa_manual" form="form-cotizar" inputmode="decimal"
+                       value="{{ form_data.tasa_manual }}" placeholder="Ej. 1.044,08" aria-describedby="ayuda-tasa">
+                <small id="ayuda-tasa">Solo para esta cotización. Deja el campo vacío para usar el dólar observado.</small>
+                {% if error_manual %}<span class="quote-alert" role="alert">{{ error_manual }}</span>{% endif %}
+            </div>
+        </details>
         <div class="quote-layout">
             <section class="quote-card" aria-labelledby="quote-form-title">
                 <h2 id="quote-form-title">Datos de la carga</h2>
                 {% if error %}
                     <p class="quote-alert" role="alert">{{ error }}</p>
                 {% endif %}
-                <form class="quote-form" method="post">
+                <form id="form-cotizar" class="quote-form" method="post">
                     {% csrf_token %}
+                    <fieldset class="operation-picker">
+                        <legend>¿Qué operación quieres cotizar?</legend>
+                        {% for tipo in operaciones %}
+                            <label><input type="radio" name="operacion" value="{{ tipo }}" required {% if form_data.operacion == tipo %}checked{% endif %}> {{ tipo }}</label>
+                        {% endfor %}
+                    </fieldset>
                     <div class="quote-fields">
                         <div class="quote-field">
                             <label for="nombre_cliente">
@@ -83,13 +133,8 @@
                                 </span>
                                 Puerto de origen
                             </label>
-                            <select id="puerto_origen" name="puerto_origen" required>
+                            <select id="puerto_origen" name="puerto_origen" data-inicial="{{ form_data.puerto_origen }}" required disabled>
                                 <option value="">Selecciona un puerto</option>
-                                {% for puerto in puertos_origen %}
-                                    <option value="{{ puerto }}" {% if form_data.puerto_origen == puerto %}selected{% endif %}>
-                                        {{ puerto }}
-                                    </option>
-                                {% endfor %}
                             </select>
                         </div>
                         <div class="quote-field">
@@ -99,13 +144,8 @@
                                 </span>
                                 Puerto de destino
                             </label>
-                            <select id="puerto_destino" name="puerto_destino" required>
+                            <select id="puerto_destino" name="puerto_destino" data-inicial="{{ form_data.puerto_destino }}" required disabled>
                                 <option value="">Selecciona un puerto</option>
-                                {% for puerto in puertos_destino %}
-                                    <option value="{{ puerto }}" {% if form_data.puerto_destino == puerto %}selected{% endif %}>
-                                        {{ puerto }}
-                                    </option>
-                                {% endfor %}
                             </select>
                         </div>
                         <div class="quote-field">
@@ -142,6 +182,15 @@
                         </label>
                         <textarea id="descripcion_carga" name="descripcion_carga" rows="4" placeholder="Describe brevemente la carga" required>{{ form_data.descripcion_carga|default:'' }}</textarea>
                     </div>
+                    <fieldset class="additional-costs">
+                        <legend>Costos adicionales (opcionales)</legend>
+                        <p>Ingresa importes finales en USD por todo el embarque. Cada costo se suma una vez al total.</p>
+                        <div class="quote-fields">
+                            {% for campo in adicionales %}
+                                <div class="quote-field">{{ campo.label_tag }} {{ campo }} {{ campo.errors }}</div>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
                     <button class="dark-button quote-submit" type="submit">
                         <span class="quote-submit-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 3h2m4 0h2"></path></svg>
@@ -158,7 +207,7 @@
                         <section class="quote-result" aria-labelledby="quote-result-title-{{ resultado.tipo_contenedor|slugify }}">
                             <p class="eyebrow orange">RESULTADO ESTIMADO</p>
                             <h2 id="quote-result-title-{{ resultado.tipo_contenedor|slugify }}">{{ resultado.tipo_contenedor }}</h2>
-                            <p class="quote-route">{{ resultado.ruta.puerto_origen }} → {{ resultado.ruta.puerto_destino }}</p>
+                            <p class="quote-route">{{ resultado.ruta.operacion }} · {{ resultado.ruta.origen_visible }} → {{ resultado.ruta.puerto_destino }}</p>
                             <dl class="quote-summary">
                                 <div><dt>Cliente</dt><dd>{{ resultado.nombre_cliente }}</dd></div>
                                 <div><dt>Empresa</dt><dd>{{ resultado.empresa }}</dd></div>
@@ -167,12 +216,16 @@
                                 <div><dt>Peso ingresado</dt><dd>{{ resultado.peso_carga }} kg</dd></div>
                                 <div><dt>Valor de la carga (CLP)</dt><dd>{{ resultado.valor_carga_formateado }}</dd></div>
                                 <div><dt>Contenedores necesarios</dt><dd class="quote-highlight">{{ resultado.cantidad_contenedores }}</dd></div>
-                                <div><dt>Costo fijo</dt><dd>{{ resultado.moneda }} {{ resultado.costo_fijo|floatformat:2 }}</dd></div>
-                                <div><dt>IVA (19%)</dt><dd>{{ resultado.moneda }} {{ resultado.monto_iva|floatformat:2 }}</dd></div>
+                                {% if tasa_manual_aplicada %}<div><dt>Tipo de cambio manual</dt><dd>${{ tasa_manual_aplicada }} CLP por USD</dd></div>{% endif %}
+                                <div><dt>Flete marítimo</dt><dd>{{ resultado.moneda }} {{ resultado.costo_fijo|floatformat:2 }}</dd></div>
+                                <div><dt>IVA del flete marítimo (19 %)</dt><dd>{{ resultado.moneda }} {{ resultado.monto_iva|floatformat:2 }}</dd></div>
+                                {% if resultado.flete_local %}<div><dt>Flete local</dt><dd>USD {{ resultado.flete_local|floatformat:2 }}</dd></div>{% endif %}
+                                {% if resultado.gastos_portuarios %}<div><dt>Gastos portuarios</dt><dd>USD {{ resultado.gastos_portuarios|floatformat:2 }}</dd></div>{% endif %}
                             </dl>
                             <div class="quote-total">
                                 <span>Costo total estimado</span>
                                 <strong>{{ resultado.moneda }} {{ resultado.monto_total|floatformat:2 }}</strong>
+                                {% if resultado.total_clp %}<span>{{ resultado.total_clp }} CLP</span>{% endif %}
                             </div>
                             <button class="dark-button quote-submit quote-report-button" type="button" data-container-type="{{ resultado.tipo_contenedor }}">Generar informe <span>↗</span></button>
                             <p class="quote-note">El valor final puede variar según las condiciones comerciales, climaticas y de transporte.</p>
@@ -184,41 +237,58 @@
             {% endif %}
         </div>
     </main>
+    {{ rutas_disponibles|json_script:"rutas-disponibles" }}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var origen = document.getElementById('puerto_origen');
             var destino = document.getElementById('puerto_destino');
-            var opcionesDestino = Array.from(destino.options).slice(1);
-            var origenesConDestinoCallao = [
-                'San antonio, Chile',
-                'Valparaíso, Chile'
-            ];
+            const rutas = JSON.parse(document.getElementById('rutas-disponibles').textContent);
+            const operaciones = document.querySelectorAll('input[name="operacion"]');
 
-            function actualizarDestinos() {
-                var origenSeleccionado = origen.value;
-                var permiteCallao = origenesConDestinoCallao.includes(
-                    origenSeleccionado
-                );
-                var destinoSeleccionado = destino.value;
-
-                opcionesDestino.forEach(function (opcion) {
-                    opcion.hidden = opcion.value === 'Callao, Perú'
-                        ? !permiteCallao
-                        : permiteCallao;
-                });
-
-                if (
-                    destinoSeleccionado === 'Callao, Perú'
-                    && !permiteCallao
-                ) {
-                    destino.value = '';
-                } else if (permiteCallao) {
-                    destino.value = 'Callao, Perú';
-                }
+            function rutasActivas() {
+                const elegida = document.querySelector('input[name="operacion"]:checked');
+                return rutas.filter(ruta => ruta.operacion === elegida?.value);
             }
 
-            origen.addEventListener('change', actualizarDestinos);
-            actualizarDestinos();
+            function opciones(campo, valores, inicial, fijo = false) {
+                campo.replaceChildren();
+                if (!fijo) campo.add(new Option('Selecciona un puerto', ''));
+                for (const valor of new Set(valores)) campo.add(new Option(valor, valor));
+                campo.disabled = valores.length === 0;
+                if (valores.includes(inicial)) campo.value = inicial;
+            }
+
+            function actualizarDestinos(inicial) {
+                const activas = rutasActivas();
+                const disponibles = activas.filter(ruta => ruta.origen === origen.value);
+                const fijo = disponibles.length === 1 && disponibles[0].operacion === 'Exportación';
+                opciones(destino, disponibles.map(ruta => ruta.destino), inicial, fijo);
+            }
+
+            function actualizarRuta(inicialOrigen, inicialDestino) {
+                opciones(origen, rutasActivas().map(ruta => ruta.origen), inicialOrigen);
+                actualizarDestinos(inicialDestino);
+            }
+
+            function ocultarResultados() {
+                const resultados = document.getElementById('quote-results');
+                if (resultados) resultados.hidden = true;
+            }
+
+            operaciones.forEach(control => control.addEventListener('change', () => {
+                actualizarRuta('', '');
+                ocultarResultados();
+            }));
+            origen.addEventListener('change', () => {
+                actualizarDestinos('');
+                ocultarResultados();
+            });
+            destino.addEventListener('change', ocultarResultados);
+            for (const campo of ['id_flete_local', 'id_gastos_portuarios']) {
+                document.getElementById(campo).addEventListener('input', ocultarResultados);
+            }
+            document.getElementById('tasa_manual').addEventListener('input', ocultarResultados);
+            actualizarRuta(origen.dataset.inicial, destino.dataset.inicial);
 
             var peso = document.getElementById('peso_carga');
             var unidadPeso = document.getElementById('unidad_peso');

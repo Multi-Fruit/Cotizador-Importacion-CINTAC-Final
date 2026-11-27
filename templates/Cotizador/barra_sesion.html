@@ -1,0 +1,8 @@
+<div class="container return-nav">
+    {% if mostrar_regreso %}
+        <a class="return-button" href="{% url 'cotizador' %}"><span aria-hidden="true">←</span> Regresar al cotizador</a>
+    {% endif %}
+    {% if usuario_conectado %}
+        <span class="session-user">Usuario: <strong>{{ usuario_conectado }}</strong></span>
+    {% endif %}
+</div>

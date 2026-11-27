@@ -6,24 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Historial de cotizaciones CINTAC.">
     <title>Historial | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-2">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=usuario-conectado-1">
 </head>
 <body class="quote-page cotizador-page">
-    <header class="quote-header">
-        <div class="container nav-wrap">
-            <a class="brand" href="#" aria-label="CINTAC inicio">
-                <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
-            </a>
-            <div class="quote-actions">
-                <a class="dark-button quote-history" href="{% url 'cotizador' %}">
-                    Nuevo cálculo
-                </a>
-                <a class="dark-button quote-logout" href="{% url 'login' %}">
-                    Cerrar sesión <span>↗</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    {% include 'Cotizador/encabezado_regresar.html' %}
 
     <main class="quote-main container">
         <section class="quote-intro quote-banner" style="--quote-banner-image: url('{% static 'images/MainCintac/fotopuerto.avif' %}')">
@@ -36,11 +22,24 @@
             <div class="history-heading">
                 <div>
                     <p class="eyebrow orange">REGISTROS GUARDADOS</p>
-                    <h2 id="history-title">Todas las cotizaciones</h2>
+                    <h2 id="history-title">{% if busqueda_activa %}Resultados de la búsqueda{% else %}Todas las cotizaciones{% endif %}</h2>
                 </div>
                 <span class="history-count">{{ historial_cotizaciones|length }} registro{{ historial_cotizaciones|length|pluralize }}</span>
             </div>
 
+            <form class="history-filters" method="get" aria-label="Filtrar cotizaciones">
+                {% for campo in filtros %}
+                    <div class="quote-field">
+                        {{ campo.label_tag }}
+                        {{ campo }}
+                        {{ campo.errors }}
+                    </div>
+                {% endfor %}
+                <div class="history-filter-actions">
+                    <button class="dark-button" type="submit">Buscar</button>
+                    <a href="{% url 'historial' %}">Limpiar filtros</a>
+                </div>
+            </form>
             {% if historial_cotizaciones %}
                 <div class="history-table-wrap">
                     <table class="history-table">
@@ -50,10 +49,12 @@
                                 <th>Fecha</th>
                                 <th>Usuario</th>
                                 <th>Cliente</th>
+                                <th>Operación</th>
                                 <th>Ruta</th>
                                 <th>Contenedor</th>
                                 <th>Valor de carga</th>
                                 <th>Total</th>
+                                <th>Comprobante</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,9 +73,10 @@
                                         <strong>{{ cotizacion.nombre_cliente }}</strong>
                                         <span class="history-secondary">{{ cotizacion.empresa }}</span>
                                     </td>
+                                    <td data-label="Operación">{{ cotizacion.id_ruta.operacion|default:"Sin clasificar" }}</td>
                                     <td data-label="Ruta">
                                         <span class="history-route">
-                                            {{ cotizacion.id_ruta.puerto_origen }}<br>
+                                            {{ cotizacion.id_ruta.origen_visible }}<br>
                                             <b>↓</b> {{ cotizacion.id_ruta.puerto_destino }}
                                         </span>
                                     </td>
@@ -86,14 +88,23 @@
                                     </td>
                                     <td data-label="Total">
                                         <strong class="history-total">
-                                            ${{ cotizacion.monto_total|floatformat:0 }}
+                                            USD ${{ cotizacion.monto_total|floatformat:2 }}
                                         </strong>
+                                    </td>
+                                    <td data-label="Comprobante">
+                                        {% url 'detalle_cotizacion' cotizacion.pk as detalle %}
+                                        <a href="{{ detalle }}" target="_blank" rel="noopener" aria-label="Ver detalle de la cotización {{ cotizacion.pk }}">Ver detalle</a>
+                                        <a class="history-secondary" href="{{ detalle }}?descargar=1" aria-label="Descargar PDF de la cotización {{ cotizacion.pk }}">Descargar PDF</a>
                                     </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+            {% elif filtros.errors %}
+                <p role="alert">Revisa los campos indicados para realizar la búsqueda.</p>
+            {% elif busqueda_activa %}
+                <p role="status">No se encontraron cotizaciones con estos filtros.</p>
             {% else %}
                 <div class="history-empty">
                     <h3>Aún no hay cotizaciones</h3>
