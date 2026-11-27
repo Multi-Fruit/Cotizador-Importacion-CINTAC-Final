@@ -6,24 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Crear una ruta logística CINTAC.">
     <title>Crear ruta | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-2">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=usuario-conectado-1">
 </head>
 <body class="quote-page cotizador-page">
-    <header class="quote-header">
-        <div class="container nav-wrap">
-            <a class="brand" href="/" aria-label="CINTAC inicio">
-                <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
-            </a>
-            <div class="quote-actions">
-                <a class="dark-button quote-history" href="{% url 'cotizador' %}">
-                    Cotizador
-                </a>
-                <a class="dark-button quote-logout" href="{% url 'logout' %}">
-                    Cerrar sesión <span>↗</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    {% include 'Cotizador/encabezado_regresar.html' %}
 
     <main class="quote-main container">
         <section class="quote-intro quote-banner" style="--quote-banner-image: url('{% static 'images/MainCintac/fotopuerto.avif' %}')">
@@ -37,7 +23,7 @@
             {% if success %}
                 <p class="quote-alert quote-success" role="status">{{ success }}</p>
                 <p class="quote-route quote-success">
-                    Ruta guardada: {{ created_route.puerto_origen }} →
+                    Ruta guardada: {{ created_route.origen_visible }} →
                     {{ created_route.puerto_destino }}
                 </p>
             {% endif %}
@@ -46,15 +32,30 @@
             {% endif %}
             <form class="quote-form" method="post" action="{% url 'crear' %}">
             {% csrf_token %}
+                <fieldset class="operation-picker">
+                    <legend>¿Qué tipo de ruta quieres crear?</legend>
+                    {% for opcion in form.operacion %}<label>{{ opcion.tag }} {{ opcion.choice_label }}</label>{% endfor %}
+                    {{ form.operacion.errors }}
+                </fieldset>
                 <div class="quote-fields">
                     <div class="quote-field">
                         {{ form.puerto_origen.label_tag }}
                         {{ form.puerto_origen }}
+                        <select id="origen-exportacion" name="puerto_origen" class="route-form-control" hidden disabled required>
+                            <option value="">Selecciona un puerto</option>
+                            <option>San Antonio, Chile</option>
+                            <option>Valparaíso, Chile</option>
+                        </select>
                         {{ form.puerto_origen.errors }}
                     </div>
                     <div class="quote-field">
                         {{ form.puerto_destino.label_tag }}
                         {{ form.puerto_destino }}
+                        <select id="destino-importacion" name="puerto_destino" class="route-form-control" hidden disabled required>
+                            <option value="">Selecciona un puerto</option>
+                            <option>San Antonio, Chile</option>
+                            <option>Valparaíso, Chile</option>
+                        </select>
                         {{ form.puerto_destino.errors }}
                     </div>
                     <div class="quote-field">
@@ -87,5 +88,36 @@
             </form>
         </section>
     </main>
+<script>
+    const origen = document.getElementById('id_puerto_origen');
+    const origenExportacion = document.getElementById('origen-exportacion');
+    const etiquetaOrigen = document.querySelector('label[for="id_puerto_origen"]');
+    const destino = document.getElementById('id_puerto_destino');
+    const destinoImportacion = document.getElementById('destino-importacion');
+    const etiquetaDestino = document.querySelector('label[for="id_puerto_destino"]');
+
+    function actualizarPuertos(inicial) {
+        const operacion = document.querySelector('input[name="operacion"]:checked')?.value;
+        const exportacion = operacion === 'Exportación';
+        origen.hidden = exportacion;
+        origen.disabled = !operacion || exportacion;
+        origenExportacion.hidden = !exportacion;
+        origenExportacion.disabled = !exportacion;
+        etiquetaOrigen.htmlFor = exportacion ? origenExportacion.id : origen.id;
+        origenExportacion.value = inicial ? origen.value : '';
+        if (!inicial || exportacion) origen.value = '';
+        destino.hidden = !exportacion;
+        destino.disabled = !exportacion;
+        destinoImportacion.hidden = exportacion;
+        destinoImportacion.disabled = !operacion || exportacion;
+        etiquetaDestino.htmlFor = exportacion ? destino.id : destinoImportacion.id;
+        destinoImportacion.value = inicial ? destino.value : '';
+        if (!inicial || !exportacion) destino.value = '';
+    }
+
+    document.querySelectorAll('input[name="operacion"]').forEach(control =>
+        control.addEventListener('change', () => actualizarPuertos(false)));
+    actualizarPuertos(true);
+</script>
 </body>
 </html>

@@ -1,0 +1,10 @@
+{% load static %}
+<header class="quote-header">
+    <div class="container nav-wrap">
+        <a class="brand" href="{% url 'cotizador' %}" aria-label="Ir al cotizador">
+            <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
+        </a>
+        <a class="dark-button quote-logout" href="{% url 'logout' %}">Cerrar sesión <span>↗</span></a>
+    </div>
+</header>
+{% include 'Cotizador/barra_sesion.html' with mostrar_regreso=True %}

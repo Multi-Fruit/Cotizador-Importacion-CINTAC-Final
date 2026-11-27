@@ -3,10 +3,15 @@ from math import ceil
 import re
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import CrearRutaForm
+from .dolar import obtener_dolar
+from django.utils import timezone
+from .pdf import generar_cotizacion_pdf, numero
+from .forms import CostosAdicionalesForm, CrearRutaForm, FiltrosHistorialForm
 from .models import (
     Login,
     cotizacion_generada,
@@ -17,19 +22,7 @@ from .models import (
     valida_nombre,
 )
 
-USD_TO_CLP = Decimal('950')
-
-ORIGENES_CON_DESTINO_CALLAO = {
-    'San antonio, Chile',
-    'Valparaíso, Chile',
-}
-
-DESTINO_CALLAO = 'Callao, Perú'
-
-
-def _pdf_escape(value):
-    return str(value).replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
-
+TASA_HISTORICA = Decimal('950')
 
 def _safe_filename(value):
     return re.sub(r'[<>:"/\\|?*]+', '', str(value)).strip()
@@ -39,116 +32,6 @@ def _format_clp(value):
     if value is None:
         return 'No ingresado'
     return f'${value:,.0f}'.replace(',', '.')
-
-def _build_quote_pdf(data, registro):
-    total_clp = (
-        Decimal(str(data['monto_total'])) * USD_TO_CLP
-    ).quantize(Decimal('1'))
-    def text(value):
-        return _pdf_escape(value).encode('latin-1', errors='replace').decode('latin-1')
-
-    def line(value, x, y, font='F1', size=10, color='0.15 0.20 0.23'):
-        return (
-            f'{color} rg BT /{font} {size} Tf {x} {y} Td '
-            f'({text(value)}) Tj ET'
-        )
-
-    def box(x, y, width, height, color, stroke=False):
-        operator = 'B' if stroke else 'f'
-        return f'{color} rg {x} {y} {width} {height} re {operator}'
-
-    stream_lines = [
-        box(0, 700, 612, 92, '0.11 0.19 0.23'),
-        box(0, 700, 612, 6, '0.95 0.44 0.13'),
-        line('CINTAC', 42, 752, 'F2', 28, '1 1 1'),
-        line('COTIZACION DE TRANSPORTE', 42, 728, 'F1', 11, '1 1 1'),
-        line(f'ID #{registro.pk}', 470, 758, 'F2', 11, '1 1 1'),
-        line(f'{registro.fecha:%d/%m/%Y %H:%M}', 424, 738, 'F1', 9, '0.84 0.88 0.88'),
-        line('DATOS DEL CLIENTE', 42, 675, 'F2', 11, '0.95 0.44 0.13'),
-        box(42, 555, 528, 102, '0.97 0.98 0.98'),
-        box(42, 653, 528, 4, '0.95 0.44 0.13'),
-        line(f'Cliente: {data["nombre_cliente"]}', 58, 630),
-        line(f'Empresa: {data["empresa"]}', 58, 610),
-        line(f'Correo: {data["correo_cliente"]}', 58, 590),
-        line(f'Usuario: {data["usuario"]}', 330, 630),
-        line(f'Contenedor: {data["tipo_contenedor"]}', 330, 610),
-        line(f'Peso: {data["peso_ingresado_kg"]} kg', 330, 590),
-        line('DETALLE DE LA COTIZACION', 42, 530, 'F2', 11, '0.95 0.44 0.13'),
-        box(42, 385, 528, 127, '1 1 1', True),
-        line(
-            f'Ruta: {data["puerto_origen"]} -> {data["puerto_destino"]}',
-            58, 488, 'F2', 10, '0.11 0.25 0.35'
-        ),
-        line(
-            f'Descripcion: {data["descripcion_carga"] or "Sin descripcion"}',
-            58, 468, 'F1', 9
-        ),
-        line(
-            f'Valor de carga: {_format_clp(data["valor_carga_kg"])}',
-            58, 448, 'F1', 9
-        ),
-        line(
-            f'Contenedores necesarios: {data["cantidad_contenedores"]}',
-            58, 425, 'F1', 10
-        ),
-        line(
-            f'Costo fijo: USD {Decimal(str(data["costo_fijo"])):.2f}',
-            330, 425, 'F1', 10
-        ),
-        line(
-            f'IVA (19%): USD {Decimal(str(data["monto_IVA"])):.2f}',
-            330, 405, 'F1', 10
-        ),
-        box(42, 285, 528, 88, '0.11 0.19 0.23'),
-        line('TOTAL ESTIMADO', 62, 345, 'F2', 11, '1 1 1'),
-        line(
-            f'USD {Decimal(str(data["monto_total"])):.2f}',
-            62, 315, 'F2', 24, '1 1 1'
-        ),
-        line('CONVERSION A PESOS CHILENOS', 330, 345, 'F2', 9, '0.95 0.44 0.13'),
-        line(f'{_format_clp(total_clp)} CLP', 330, 315, 'F2', 22, '1 1 1'),
-        line(
-            f'Tasa utilizada: 1 USD = ${USD_TO_CLP:,.0f} CLP',
-            330, 296, 'F1', 8, '0.84 0.88 0.88'
-        ),
-        line(
-            'El valor final puede variar segun las condiciones comerciales y de transporte.',
-            42, 245, 'F1', 8, '0.40 0.46 0.48'
-        ),
-        box(42, 72, 528, 1, '0.95 0.44 0.13'),
-        line('CINTAC | Cotizador de transporte', 42, 52, 'F2', 9, '0.11 0.19 0.23'),
-        line('www.cintac.cl', 470, 52, 'F1', 8, '0.40 0.46 0.48'),
-    ]
-    stream = '\n'.join(stream_lines).encode('latin-1', errors='replace')
-
-    objects = [
-        b'<< /Type /Catalog /Pages 2 0 R >>',
-        b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-        b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] '
-        b'/Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>',
-        b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-        b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
-        b'<< /Length ' + str(len(stream)).encode('ascii') + b' >>\nstream\n'
-        + stream + b'\nendstream',
-    ]
-    pdf = bytearray(b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n')
-    offsets = [0]
-    for number, obj in enumerate(objects, start=1):
-        offsets.append(len(pdf))
-        pdf.extend(f'{number} 0 obj\n'.encode('ascii'))
-        pdf.extend(obj)
-        pdf.extend(b'\nendobj\n')
-    xref_offset = len(pdf)
-    pdf.extend(f'xref\n0 {len(objects) + 1}\n'.encode('ascii'))
-    pdf.extend(b'0000000000 65535 f \n')
-    for offset in offsets[1:]:
-        pdf.extend(f'{offset:010d} 00000 n \n'.encode('ascii'))
-    pdf.extend(
-        f'trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n'
-        f'startxref\n{xref_offset}\n%%EOF\n'.encode('ascii')
-    )
-    return bytes(pdf)
-
 
 def login(request):
     error = request.session.pop('login_error', None)
@@ -189,23 +72,54 @@ def Cotizador(request):
         return redirect('login')
 
     rutas = ruta_logistica.objects.order_by('puerto_origen', 'puerto_destino')
-    puertos_origen = (
-        ruta_logistica.objects.values_list('puerto_origen', flat=True)
-        .distinct()
-        .order_by('puerto_origen')
-    )
-    puertos_destino = (
-        ruta_logistica.objects.values_list('puerto_destino', flat=True)
-        .distinct()
-        .order_by('puerto_destino')
-    )
+    dolar = obtener_dolar()
+    adicionales = CostosAdicionalesForm(request.POST if request.method == 'POST' else None)
     context = {
-        'rutas': rutas,
-        'puertos_origen': puertos_origen,
-        'puertos_destino': puertos_destino,
+        'adicionales': adicionales,
+        'dolar': dolar,
+        'valor_dolar': numero(dolar.valor, 2) if dolar else None,
+        'dolar_anterior': dolar and dolar.fecha < timezone.localdate(),
+        'operaciones': ['Importación', 'Exportación'],
+        'rutas_disponibles': [
+            {'operacion': ruta.operacion, 'origen': ruta.origen_visible,
+             'destino': ruta.puerto_destino}
+            for ruta in rutas if ruta.operacion
+        ],
     }
 
+    tarifas_por_ruta = {}
+    tarifas = tarifa_contenedor.objects.filter(tipo_contenedor__in=('20 HQ', '40 HQ')).select_related('id_ruta').order_by(
+        'id_ruta__puerto_origen', 'id_ruta__puerto_destino', 'tipo_contenedor', 'pk'
+    )
+    for tarifa in tarifas:
+        ruta = tarifa.id_ruta
+        if ruta.operacion:
+            fila = tarifas_por_ruta.setdefault(ruta.pk, {'ruta': ruta})
+            simbolo = '$' if tarifa.moneda_original == 'USD' else ''
+            fila['precio_20' if tarifa.tipo_contenedor == '20 HQ' else 'precio_40'] = (
+                f'{tarifa.moneda_original} {simbolo}{tarifa.costo_fijo:,}'.replace(',', '.')
+            )
+    context['tarifas_actuales'] = tarifas_por_ruta.values()
+
     if request.method == 'POST':
+        if not adicionales.is_valid():
+            context['form_data'] = request.POST
+            return render(request, 'Cotizador/cotizador.html', context)
+        flete_local = adicionales.cleaned_data['flete_local'] or Decimal('0')
+        gastos_portuarios = adicionales.cleaned_data['gastos_portuarios'] or Decimal('0')
+        tasa = dolar.valor if dolar else None
+        fecha_tasa = dolar.fecha if dolar else None
+        entrada = request.POST.get('tasa_manual', '').strip()
+        if entrada:
+            # Acepta 1044,08, 1.044,08 y 1044.08; un punto de miles indica pesos enteros.
+            if re.fullmatch(r'[0-9]{1,3}(?:\.[0-9]{3})+(?:,[0-9]{1,2})?', entrada):
+                entrada = entrada.replace('.', '')
+            if not re.fullmatch(r'[0-9]{1,10}(?:[.,][0-9]{1,2})?', entrada) or Decimal(entrada.replace(',', '.')) <= 0:
+                context.update(form_data=request.POST, error_manual='Ingresa una tasa positiva con hasta dos decimales.')
+                return render(request, 'Cotizador/cotizador.html', context)
+            tasa = Decimal(entrada.replace(',', '.'))
+            fecha_tasa = timezone.localdate()
+            context['tasa_manual_aplicada'] = numero(tasa, 2)
         nombre_cliente = request.POST.get('nombre_cliente', '').strip()
         empresa = request.POST.get('empresa', '').strip()
         correo_cliente = request.POST.get('correo_cliente', '').strip()
@@ -253,37 +167,26 @@ def Cotizador(request):
         else:
             valor_carga_ingresado = None
 
-        if (
-            (origen in ORIGENES_CON_DESTINO_CALLAO and destino != DESTINO_CALLAO)
-            or (
-                origen not in ORIGENES_CON_DESTINO_CALLAO
-                and destino == DESTINO_CALLAO
-            )
-        ):
-            context['error'] = (
-                'La combinación de puerto de origen y destino no es válida.'
-            )
+        ruta = next((ruta for ruta in rutas
+                     if ruta.origen_visible == origen and ruta.puerto_destino == destino
+                     and ruta.operacion and ruta.operacion == request.POST.get('operacion')), None)
+        if ruta is None:
+            context['error'] = 'Selecciona una ruta válida para la operación elegida.'
             context['form_data'] = request.POST
             return render(request, 'Cotizador/cotizador.html', context)
 
-        ruta = ruta_logistica.objects.filter(
-            puerto_origen=origen,
-            puerto_destino=destino,
-        ).first()
         tarifas = (
             tarifa_contenedor.objects.filter(
                 id_ruta=ruta,
                 tipo_contenedor__in=('20 HQ', '40 HQ'),
             )
-            if ruta is not None
-            else tarifa_contenedor.objects.none()
         )
         tarifas_por_tipo = {
             tarifa.tipo_contenedor: tarifa
             for tarifa in tarifas
         }
 
-        if ruta is None or set(tarifas_por_tipo) != {'20 HQ', '40 HQ'}:
+        if set(tarifas_por_tipo) != {'20 HQ', '40 HQ'}:
             context['error'] = (
                 'No existen tarifas para contenedores 20 HQ y 40 HQ en la ruta seleccionada.'
             )
@@ -296,7 +199,7 @@ def Cotizador(request):
             cantidad = ceil(peso_carga / tarifa.peso_max)
             costo_fijo = Decimal(tarifa.costo_fijo) * cantidad
             monto_iva = (costo_fijo * Decimal('0.19')).quantize(Decimal('0.01'))
-            monto_total = costo_fijo + monto_iva
+            monto_total = costo_fijo + monto_iva + flete_local + gastos_portuarios
             resultados.append({
                 'ruta': ruta,
                 'nombre_cliente': nombre_cliente,
@@ -310,8 +213,11 @@ def Cotizador(request):
                 'peso_max': tarifa.peso_max,
                 'cantidad_contenedores': cantidad,
                 'costo_fijo': costo_fijo,
+                'flete_local': flete_local,
+                'gastos_portuarios': gastos_portuarios,
                 'monto_iva': monto_iva,
                 'monto_total': monto_total,
+                'total_clp': _format_clp(monto_total * tasa) if tasa else None,
                 'moneda': tarifa.moneda_original,
             })
         context['resultados'] = resultados
@@ -326,11 +232,18 @@ def Cotizador(request):
                 'tipo_contenedor': resultado['tipo_contenedor'],
                 'cantidad_contenedores': resultado['cantidad_contenedores'],
                 'id_ruta': ruta.pk,
+                'tasa_usd_clp': str(tasa) if tasa else None,
+                'dolar_manual': bool(entrada),
+                'fecha_dolar': fecha_tasa.isoformat() if fecha_tasa else None,
+                'dias_transito': ruta.dias_transito,
+                'peso_max': resultado['peso_max'],
                 'puerto_origen': ruta.puerto_origen,
                 'puerto_destino': ruta.puerto_destino,
                 'monto_IVA': str(resultado['monto_iva']),
                 'monto_total': str(resultado['monto_total']),
                 'costo_fijo': str(resultado['costo_fijo']),
+                'flete_local': str(flete_local),
+                'gastos_portuarios': str(gastos_portuarios),
                 'moneda': resultado['moneda'],
                 'usuario': Login.objects.get(pk=login_id).username,
             }
@@ -376,6 +289,9 @@ def informe(request):
         try:
             registro = cotizacion_generada(
                 id_ruta_id=cotizacion['id_ruta'],
+                tasa_usd_clp=cotizacion.get('tasa_usd_clp', TASA_HISTORICA),
+                fecha_dolar=cotizacion.get('fecha_dolar'),
+                dolar_manual=cotizacion.get('dolar_manual', False),
                 id_usuario_id=login_id,
                 nombre_cliente=cotizacion['nombre_cliente'],
                 empresa=cotizacion['empresa'],
@@ -385,20 +301,24 @@ def informe(request):
                 valor_carga_kg=cotizacion['valor_carga_kg'],
                 tipo_contenedor=cotizacion['tipo_contenedor'],
                 cantidad_contenedores=cotizacion['cantidad_contenedores'],
-                monto_IVA=int(Decimal(cotizacion['monto_IVA'])),
-                monto_total=int(Decimal(cotizacion['monto_total'])),
+                flete_local=cotizacion.get('flete_local', 0),
+                gastos_portuarios=cotizacion.get('gastos_portuarios', 0),
+                monto_IVA=Decimal(cotizacion['monto_IVA']),
+                monto_total=Decimal(cotizacion['monto_total']),
             )
             registro.full_clean()
-            registro.save()
+            with transaction.atomic():
+                registro.save()
+                registro.comprobante_pdf = generar_cotizacion_pdf(cotizacion, registro, registro.tasa_usd_clp)
+                registro.save(update_fields=['comprobante_pdf'])
         except ValidationError as error:
             return JsonResponse({'error': error.messages[0]}, status=400)
 
         request.session.pop('cotizaciones_pendientes', None)
-        pdf = _build_quote_pdf(cotizacion, registro)
-        response = HttpResponse(pdf, content_type='application/pdf')
+        response = HttpResponse(registro.comprobante_pdf, content_type='application/pdf')
         filename = (
             f'Cotizacion {_safe_filename(cotizacion["nombre_cliente"])} '
-            f'{registro.fecha:%d-%m-%Y}.pdf'
+            f'{timezone.localdate(registro.fecha):%d-%m-%Y}.pdf'
         )
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
@@ -415,9 +335,27 @@ def historial(request):
         return redirect('login')
 
     historial_cotizaciones = (
-        cotizacion_generada.objects.select_related('id_ruta')
+        cotizacion_generada.objects.defer('comprobante_pdf').select_related('id_ruta', 'id_usuario')
         .order_by('-fecha')
     )
+    filtros = FiltrosHistorialForm(request.GET)
+    if filtros.is_valid():
+        datos = filtros.cleaned_data
+        for campo, filtro in [('id', 'pk'), ('ruta', 'id_ruta'), ('desde', 'fecha__date__gte'),
+                              ('hasta', 'fecha__date__lte')]:
+            if datos[campo]:
+                historial_cotizaciones = historial_cotizaciones.filter(**{filtro: datos[campo]})
+        if datos['cliente']:
+            historial_cotizaciones = historial_cotizaciones.filter(
+                Q(nombre_cliente__icontains=datos['cliente']) | Q(empresa__icontains=datos['cliente'])
+            )
+        if datos['operacion']:
+            rutas = filtros.fields['ruta'].queryset
+            ids = [ruta.pk for ruta in rutas if ruta.operacion == datos['operacion']]
+            historial_cotizaciones = historial_cotizaciones.filter(id_ruta_id__in=ids)
+    else:
+        historial_cotizaciones = historial_cotizaciones.none()
+
     for cotizacion in historial_cotizaciones:
         cotizacion.valor_carga_formateado = _format_clp(
             cotizacion.valor_carga_kg
@@ -425,9 +363,43 @@ def historial(request):
 
     context = {
         'historial_cotizaciones': historial_cotizaciones,
+        'filtros': filtros,
+        'busqueda_activa': any(request.GET.get(campo) for campo in filtros.fields),
     }
 
     return render(request, 'Cotizador/historial.html', context)
+
+def detalle_cotizacion(request, cotizacion_id):
+    if not Login.objects.filter(pk=request.session.get('login_id')).exists():
+        return redirect('login')
+
+    registro = get_object_or_404(
+        cotizacion_generada.objects.select_related('id_ruta', 'id_usuario'),
+        pk=cotizacion_id,
+    )
+    pdf = registro.comprobante_pdf
+    if not pdf:
+        datos = {
+            campo: getattr(registro, campo) for campo in (
+                'nombre_cliente', 'empresa', 'correo_cliente', 'descripcion_carga',
+                'tipo_contenedor', 'cantidad_contenedores', 'peso_ingresado_kg',
+                'valor_carga_kg', 'monto_IVA', 'monto_total',
+            )
+        }
+        datos.update(
+            titulo='COTIZACION | COPIA DEL REGISTRO HISTORICO',
+            usuario=registro.id_usuario.username,
+            puerto_destino=registro.id_ruta.puerto_destino,
+            costo_fijo=registro.monto_total - registro.monto_IVA - registro.flete_local - registro.gastos_portuarios,
+        )
+        pdf = generar_cotizacion_pdf(datos, registro, registro.tasa_usd_clp)
+
+    response = HttpResponse(bytes(pdf), content_type='application/pdf')
+    modo = 'attachment' if request.GET.get('descargar') == '1' else 'inline'
+    response['Content-Disposition'] = f'{modo}; filename="Cotizacion-{registro.pk}.pdf"'
+    response['Cache-Control'] = 'private, no-store'
+    return response
+
 
 def crear(request):
     login_id = request.session.get('login_id')

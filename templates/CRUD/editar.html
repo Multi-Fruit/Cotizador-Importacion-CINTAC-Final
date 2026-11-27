@@ -6,24 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Editar una ruta logística CINTAC.">
     <title>Editar ruta | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-2">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=usuario-conectado-1">
 </head>
 <body class="quote-page cotizador-page">
-    <header class="quote-header">
-        <div class="container nav-wrap">
-            <a class="brand" href="/" aria-label="CINTAC inicio">
-                <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
-            </a>
-            <div class="quote-actions">
-                <a class="dark-button quote-history" href="{% url 'cotizador' %}">
-                    Cotizador
-                </a>
-                <a class="dark-button quote-logout" href="{% url 'logout' %}">
-                    Cerrar sesión <span>↗</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    {% include 'Cotizador/encabezado_regresar.html' %}
 
     <main class="quote-main container">
         <section class="quote-intro quote-banner" style="--quote-banner-image: url('{% static 'images/MainCintac/fotopuerto.avif' %}')">

@@ -6,17 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Generador de informe de cotización CINTAC.">
     <title>Informe | CINTAC</title>
-    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=cotizador-workflow-2">
+    <link rel="stylesheet" href="{% static 'CSS/cintac.css' %}?v=usuario-conectado-1">
 </head>
 <body class="quote-page cotizador-page">
     <header class="quote-header">
         <div class="container nav-wrap">
-            <a class="brand" href="#" aria-label="CINTAC inicio">
+            <a class="brand" href="{% url 'cotizador' %}" aria-label="Ir al cotizador">
                 <img src="{% static 'images/MainCintac/logo.jpg' %}" alt="CINTAC">
             </a>
-            <a class="dark-button quote-logout" href="{% url 'login' %}">Cerrar sesión <span>↗</span></a>
+            <a class="dark-button quote-logout" href="{% url 'logout' %}">Cerrar sesión <span>↗</span></a>
         </div>
     </header>
+    {% include 'Cotizador/barra_sesion.html' %}
 
     <main class="quote-main container">
         <section class="quote-intro quote-banner" style="--quote-banner-image: url('{% static 'images/MainCintac/fotopuerto.avif' %}')">

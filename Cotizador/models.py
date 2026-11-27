@@ -104,11 +104,25 @@ class ruta_logistica(models.Model):
 
     id = models.AutoField(primary_key=True)
     puerto_origen = models.CharField(max_length=100, choices=PUERTOS_ORIGEN, null=False,)
-    puerto_destino = models.CharField(max_length=100, choices=PUERTOS_DESTINO, null=False)
+    puerto_destino = models.CharField(max_length=100, null=False)
     dias_transito = models.IntegerField(null=False)
 
+    @property
+    def origen_visible(self):
+        if self.puerto_origen.casefold() == 'san antonio, chile':
+            return 'San Antonio, Chile'
+        return self.puerto_origen
+
+    @property
+    def operacion(self):
+        origen_chileno = self.origen_visible in {'San Antonio, Chile', 'Valparaíso, Chile'}
+        destinos_importacion = {'San Antonio, Chile', 'Valparaíso, Chile', 'Valparaiso, Chile'}
+        if self.puerto_destino in destinos_importacion:
+            return None if origen_chileno else 'Importación'
+        return 'Exportación' if origen_chileno else None
+
     def __str__(self):
-        return f"{self.puerto_origen} - {self.puerto_destino} ({self.dias_transito} días)"
+        return f"{self.origen_visible} - {self.puerto_destino} ({self.dias_transito} días)"
 
 
 class tarifa_contenedor(models.Model):
@@ -136,5 +150,16 @@ class cotizacion_generada(models.Model):
     valor_carga_kg = models.IntegerField(null=True, blank=True)
     tipo_contenedor = models.CharField(max_length=50, null=False)
     cantidad_contenedores = models.IntegerField(null=False)
-    monto_IVA = models.IntegerField(null=False)
-    monto_total = models.IntegerField(null=False)
+    flete_local = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    gastos_portuarios = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    monto_IVA = models.DecimalField(max_digits=20, decimal_places=2)
+    monto_total = models.DecimalField(max_digits=20, decimal_places=2)
+    comprobante_pdf = models.BinaryField(null=True, blank=True, editable=False)
+    dolar_manual = models.BooleanField(default=False)
+    tasa_usd_clp = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    fecha_dolar = models.DateField(null=True, blank=True)
+
+
+class DolarObservado(models.Model):
+    fecha = models.DateField(primary_key=True)
+    valor = models.DecimalField(max_digits=12, decimal_places=2)
